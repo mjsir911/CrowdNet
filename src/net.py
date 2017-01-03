@@ -136,15 +136,15 @@ class Input(Neuron):
 
 
 class Net():
-    def __init__(self, alpha=0.5, hidden_neurons=[1]):
+    def __init__(self, alpha=0.5, input_neurons=3, hidden_neurons=[1], output_neurons = 2):
         self.alpha = alpha
-        self._inputs = [Input() for x in range(3)]
+        self._inputs = [Input() for x in range(input_neurons)]
 
         self.hiddens = [Neuron([self._inputs[0].Axon(), self._inputs[1].Axon(0.3)], lambda a, b: a + b) for x in range(hidden_neurons[0])]
 
         self._outputs = [
-                Neuron([neuron.Axon() for neuron in self.hiddens], lambda a, b: a + b),
-                #Neuron([self.hiddens[0].Axon(0.5), self.hiddens[1].Axon(0.55), constant2.Axon(1)], lambda a, b: a + b),
+                Neuron([neuron.Axon() for neuron in self.hiddens], lambda a, b: a + b)
+                for x in range(output_neurons)
                 ]
 
         self.neurons = self.hiddens + self._outputs
