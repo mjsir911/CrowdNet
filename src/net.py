@@ -31,6 +31,7 @@ def node_delta(ideal, actual):
     return -(ideal - actual) * actual * (1 - actual)
     #return -(ideal - actual) * actual * (1 - out)
 
+
 class Neuron():
     def __init__(self, inputs, operation):
         self.terminals = inputs
@@ -137,9 +138,9 @@ class Input(Neuron):
 class Net():
     def __init__(self, alpha=0.5, hidden_neurons=[1]):
         self.alpha = alpha
-        self._inputs = [Input() for x in range(5)]
+        self._inputs = [Input() for x in range(3)]
 
-        self.hiddens = [Neuron([self._inputs[0].Axon(), self._inputs[1].Axon(0.3)], lambda a, b: a + b) for x in range(1)]
+        self.hiddens = [Neuron([self._inputs[0].Axon(), self._inputs[1].Axon(0.3)], lambda a, b: a + b) for x in range(hidden_neurons[0])]
 
         self._outputs = [
                 Neuron([neuron.Axon() for neuron in self.hiddens], lambda a, b: a + b),
@@ -168,7 +169,8 @@ class Net():
         for age in range(int(epoch)):
             for datum in dataset:
                 self.train(datum)
-            print('epoch is: ', age)
+            print('epoch is :', age, end="\r", flush=True)
+        print()
 
     @property
     def inputs(self):
@@ -183,3 +185,17 @@ class Net():
     @property
     def outputs(self):
         return [neuron.value for neuron in self._outputs]
+
+
+# Some patterns
+
+# if two zeros, output zero
+# if two ones, output 0.5
+# if three zeros or ones, output 1
+t   = [ [ [1, 1, 1], [1.0] ], [ [1, 0, 1], [0.5] ],
+        [ [0, 1, 1], [0.5] ], [ [0, 0, 1], [0.0] ],
+      ]
+
+t  += [ [ [1, 1, 0], [0.5] ], [ [1, 0, 0], [0.0] ],
+        [ [0, 1, 0], [0.0] ], [ [0, 0, 0], [1.0] ],
+      ]
