@@ -17,7 +17,7 @@ If you want to experiment around, simply open up a python interpretive shell ins
 
     import net
     network = net.Net(learning_rate, [hidden neurons in 1 layer])
-    network.train([inputs], [outputs]) # must know # of input and output neurons in code
+    network.train([inputs], [outputs]) # must know number of input and output neurons in code
     # or
     network.mass_train(iterations, [[inputs], [outputs]])
 
@@ -25,7 +25,7 @@ The network is dumb as rocks but it can work logic gates pretty well!
 
 ### Prerequisities
 
-(Python3)[https://www.python.org/download/releases/3.0/]
+[Python3](https://www.python.org/download/releases/3.0/)
 
 ### Installing
 
@@ -33,37 +33,23 @@ Installation is not particularly hard, due to the small nature of this project
 
 To get a working development environment setup, simply git clone this repository into a directory of each choice
 
-```
-git clone
-```
+  git clone
 
-And repeat
+next navigate to specified directory
 
-```
-until finished
-```
+    cd mydir
 
-End with an example of getting some data out of the system or using it for a little demo
+You should see the contents of the repository's filesystem
 
 ## Running the tests
 
-Explain how to run the automated tests for this system
+To run the automated test, navigate to the test directory and run the threeXNOR.py file
 
-### Break down into end to end tests
+    python3 threeXNOR.py
 
-Explain what these tests test and why
+or
 
-```
-Give an example
-```
-
-### And coding style tests
-
-Explain what these tests test and why
-
-```
-Give an example
-```
+    ./threeXNOR.py
 
 ## Deployment
 
@@ -71,9 +57,8 @@ Add additional notes about how to deploy this on a live system
 
 ## Built With
 
-* Dropwizard - Bla bla bla
-* Maven - Maybe
-* Atom - ergaerga
+* vim
+* lots of googling
 
 ## Contributing
 
@@ -81,13 +66,13 @@ Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduc
 
 ## Versioning
 
-We use [SemVer](http://semver.org/) for versioning. For the versions available, see the [tags on this repository](https://github.com/your/project/tags). 
+We use [SemVer](http://semver.org/) for versioning. For the versions available, see the [tags on this repository](../tags). 
 
 ## Authors
 
-* **Billie Thompson** - *Initial work* - [PurpleBooth](https://github.com/PurpleBooth)
+* **Marco Sirabella** - *Initial work* - [mjsir911](https://github.com/mjsir911)
 
-See also the list of [contributors](https://github.com/your/project/contributors) who participated in this project.
+See also the list of [contributors](CONTRIBUTORS.md) who participated in this project.
 
 ## License
 
@@ -95,7 +80,6 @@ This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md
 
 ## Acknowledgments
 
-* Hat tip to anyone who's code was used
-* Inspiration
-* etc
+* [Tensorflow](https://github.com/tensorflow) for inspiration
+* [Mat Mazur](https://mattmazur.com/2015/03/17/a-step-by-step-backpropagation-example/) for understanding
 
