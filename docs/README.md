@@ -53,11 +53,12 @@ or
 
 ## Deployment
 
-Add additional notes about how to deploy this on a live system
+Learning takes a bit of time(obviously)
+Bigger neural networks take insane amounts of ram
 
 ## Built With
 
-* vim
+* [vim](http://www.vim.org/)
 * lots of googling
 
 ## Contributing
