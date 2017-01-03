@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import sys
-sys.path.insert('../src')
+sys.path.insert(0, '../src')
 import net
 
 __appname__     = ""
@@ -16,11 +16,11 @@ __email__       = "msirabel@gmail.com"
 __status__      = "Prototype"  # "Prototype", "Development" or "Production"
 __module__      = ""
 
-network = net.Net(0.5, 3, [10], 2)
-inp = lambda: input('a binary value? : ')
+network = net.Net(1, 3, [10], 2)
+inp = lambda: int(input('a binary value? : '))
 try:
-    network.mass_train(net.t, int(2e4))
+    network.mass_train(net.t, int(2e3))
 except KeyboardInterrupt:
     print('impatient much?')
-network.input = [inp(), inp(), inp()]
-print(output)
+network.inputs = [inp(), inp(), inp()]
+print(network.outputs)

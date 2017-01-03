@@ -82,5 +82,5 @@ This project is licensed under the MIT License - see the [LICENSE.md](/docs/LICE
 ## Acknowledgments
 
 * [Tensorflow](https://github.com/tensorflow) for inspiration
-* [Mat Mazur](https://mattmazur.com/2015/03/17/a-step-by-step-backpropagation-example/) for understanding
+* [Mat Mazur](https://mattmazur.com/2015/03/17/a-step-by-step-backpropagation-example/) for help understanding
 
