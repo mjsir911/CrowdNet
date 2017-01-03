@@ -189,13 +189,14 @@ class Net():
 
 # Some patterns
 
-# if two zeros, output zero
-# if two ones, output 0.5
-# if three zeros or ones, output 1
-t   = [ [ [1, 1, 1], [1.0] ], [ [1, 0, 1], [0.5] ],
-        [ [0, 1, 1], [0.5] ], [ [0, 0, 1], [0.0] ],
+# doesnt like fractions of values, stick with 0s and 1s
+# if two zeros, output 0, 1
+# if two ones, output 1, 0
+# if three zeros or ones, output 1, 1
+t   = [ [ [1, 1, 1], [1, 1] ], [ [1, 0, 1], [1, 0] ],
+        [ [0, 1, 1], [1, 0] ], [ [0, 0, 1], [0, 1] ],
       ]
 
-t  += [ [ [1, 1, 0], [0.5] ], [ [1, 0, 0], [0.0] ],
-        [ [0, 1, 0], [0.0] ], [ [0, 0, 0], [1.0] ],
+t  += [ [ [1, 1, 0], [1, 0] ], [ [1, 0, 0], [0, 1] ],
+        [ [0, 1, 0], [0, 1] ], [ [0, 0, 0], [1, 1] ],
       ]
