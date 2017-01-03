@@ -14,6 +14,7 @@ Tensorflow actually provides really nice neural network stuff [here](http://play
 ## Getting Started
 
 If you want to experiment around, simply open up a python interpretive shell inside the (src)[../src]
+
     import net
     network = net.Net(learning_rate, [hidden neurons in 1 layer])
     network.train([inputs], [outputs]) # must know # of input and output neurons in code
