@@ -64,8 +64,8 @@ class Neuron():
     def net_derivative(self):
         net = 0
         for axon in self.axons:
-            #net += axon.connection.net_derivative * axon.weight
-            net += axon.connection.inverse * axon.weight
+            #net += axon.dendrite.net_derivative * axon.weight
+            net += axon.dendrite.inverse * axon.weight
         if not self.axons:
         #if not net: # does same thing
             #net = -(self.target - self.value) * self.value * (1 - self.value)
@@ -98,26 +98,26 @@ class Neuron():
                 self.weight = 2 * random.random() - 1
             self.parent = parent
             self.new_weight = None
-            self.connection = None
+            self.dendrite = None
 
-        def connect(self, connection):
-            assert not self.connection
-            self.connection = connection
+        def connect(self, dendrite):
+            assert not self.dendrite
+            self.dendrite = dendrite
 
         @property
         def value(self):
             return self.parent.value * self.weight
 
         def backprop(self, alpha):
-            #output_error_derivative = -(self.connection.target - self.connection.value)
-            output_error_derivative = self.connection.net_derivative
+            #output_error_derivative = -(self.dendrite.target - self.dendrite.value)
+            output_error_derivative = self.dendrite.net_derivative
             #print('a : ', output_error_derivative)
-            output_sig_der = self.connection.value * ( 1 - self.connection.value)
+            output_sig_der = self.dendrite.value * ( 1 - self.dendrite.value)
             #print('b : ', output_sig_der)
             weight_derivative = 1 * self.parent.value * self.weight ** (1 - 1) + 0 + 0
             #print('c : ', weight_derivative)
             delta_error = output_error_derivative * output_sig_der * weight_derivative
-            #delta_error = self.connection.net_derivative * output_sig_der * weight_derivative
+            #delta_error = self.dendrite.net_derivative * output_sig_der * weight_derivative
             #print(delta_error)
             self.new_weight = self.weight - alpha * delta_error
 
@@ -137,15 +137,23 @@ class Input(Neuron):
 
 class Net():
     def __init__(self, alpha=0.5, input_neurons=3, hidden_neurons=[1], output_neurons = 2):
+        chain = []
         self.alpha = alpha
         self._inputs = [Input() for x in range(input_neurons)]
+        chain.append(self._inputs)
 
-        self.hiddens = [Neuron([self._inputs[0].Axon(), self._inputs[1].Axon(0.3)], lambda a, b: a + b) for x in range(hidden_neurons[0])]
+        for layer in range(len(hidden_neurons)):
+            self.hiddens = [Neuron([neuron.Axon() for neuron in chain[layer]], lambda a, b: a + b) for x in range(hidden_neurons[layer])]
+            chain.append(self.hiddens)
+
 
         self._outputs = [
-                Neuron([neuron.Axon() for neuron in self.hiddens], lambda a, b: a + b)
+                Neuron([neuron.Axon() for neuron in chain[-1]], lambda a, b: a + b)
                 for x in range(output_neurons)
                 ]
+
+        chain.append(self._outputs)
+        #print(chain)
 
         self.neurons = self.hiddens + self._outputs
 
@@ -166,11 +174,15 @@ class Net():
         [[axon.lock() for axon in neuron.terminals] for neuron in self.neurons] # no lock for now
 
     def mass_train(self, dataset, epoch):
-        for age in range(int(epoch)):
-            for datum in dataset:
-                self.train(datum)
-            print('epoch is :', age, end="\r", flush=True)
-        print()
+        try:
+            for age in range(int(epoch)):
+                for datum in dataset:
+                    self.train(datum)
+                print('epoch is :', age, end="\r", flush=True)
+            print()
+        except KeyboardInterrupt:
+            print('wow rude')
+
 
     @property
     def inputs(self):
