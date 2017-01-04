@@ -32,6 +32,8 @@ def node_delta(ideal, actual):
     #return -(ideal - actual) * actual * (1 - out)
 
 
+
+
 class Neuron():
     def __init__(self, inputs, operation):
         self.terminals = inputs
@@ -136,8 +138,9 @@ class Input(Neuron):
 
 
 class Net():
-    def __init__(self, alpha=0.5, input_neurons=3, hidden_neurons=[1], output_neurons = 2):
+    def __init__(self, alpha=0.5, input_neurons=3, hidden_neurons=[1], output_neurons = 2, do_round=True):
         chain = []
+        self.do_round = do_round
         self.alpha = alpha
         self._inputs = [Input() for x in range(input_neurons)]
         chain.append(self._inputs)
@@ -159,6 +162,21 @@ class Net():
 
         self.neurons = self.hiddens + self._outputs
 
+    @property
+    def inputs(self):
+        return [neuron.value for neuron in self._inputs]
+
+    @inputs.setter
+    def inputs(self, values):
+        values = self.make_iter(values)
+        assert len(values) == len(self._inputs), 'not correct amount of inputs, provided {} inputs, need {} inputs'.format(len(values), len(self._inputs))
+        values = iter(values)
+        for neuron in self._inputs:
+            neuron.value = abs(1e-15 - next(values))
+
+    @property
+    def outputs(self):
+        return [neuron.value for neuron in self._outputs]
 
     def train(self, dataset):
         """ [[inputs], [outputs]] """
@@ -185,20 +203,67 @@ class Net():
         except KeyboardInterrupt:
             print('wow rude')
 
+    def function_train(self, func, epoch):
+        self.func = func
+        argcount = func.__code__.co_argcount
+        assert argcount == len(self.inputs), 'need different amount of inputs'
+        try:
+            for age in range(int(epoch)):
+                v_inputs  = [self.random() for x in range(argcount)]
+                try:
+                    v_outputs = func(*v_inputs)
+                except:
+                    continue
+                v_outputs = self.make_iter(v_outputs)
+                #print('input = {}, output = {}'.format(v_inputs, v_outputs))
+                self.train([v_inputs, v_outputs])
+                print('epoch is :', age, end="\r", flush=True)
+            print('training complete')
+        except KeyboardInterrupt:
+            print('wow rude')
 
-    @property
-    def inputs(self):
-        return [neuron.value for neuron in self._inputs]
+    def error(self, accuracy, func=None):
+        if not func:
+            func = self.func
+        accuracy_repeat = unsig((accuracy) / 2 + 0.5) * 1e3
+        ate = []
+        for x in range(int(accuracy_repeat)):
+            self.inputs  = [self.random() for x in range(len(self._inputs))]
+            try:
+                should = [abs(1e-15 - num) for num in self.make_iter(func(*self.inputs))]
+            except:
+                continue
+            actual = self.outputs
 
-    @inputs.setter
-    def inputs(self, values):
-        values = iter(values)
-        for neuron in self._inputs:
-            neuron.value = abs(1e-15 - next(values))
+            #print(actual)
+            #print(should)
+            assert len(actual) == len(should)
+            v = []
+            # should i average the error of all the inputs or get the error of the combined inputs
+            for a, s in zip(actual, should):
+                #v.append(abs(a - s) / a)
+                v.append(abs(a - s))
 
-    @property
-    def outputs(self):
-        return [neuron.value for neuron in self._outputs]
+            ate.append(sum(v) / len(v))
+            #print(v)
+
+        #print(ate)
+        return(sum(ate)/len(ate))
+
+    @classmethod
+    def make_iter(cls, obj):
+        try:
+            iter(obj)
+        except TypeError:
+            obj = [obj]
+
+        return obj
+
+    def random(self):
+        if self.do_round:
+            return round(random.random())
+        else:
+            return random.random()
 
 
 # Some patterns
