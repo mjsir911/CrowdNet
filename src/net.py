@@ -145,6 +145,8 @@ class Net():
         for layer in range(len(hidden_neurons)):
             self.hiddens = [Neuron([neuron.Axon() for neuron in chain[layer]], lambda a, b: a + b) for x in range(hidden_neurons[layer])]
             chain.append(self.hiddens)
+        if not hidden_neurons:
+            self.hiddens = []
 
 
         self._outputs = [
