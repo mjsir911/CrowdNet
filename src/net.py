@@ -32,7 +32,22 @@ def node_delta(ideal, actual):
     #return -(ideal - actual) * actual * (1 - out)
 
 
+import multiprocessing
+def multipro(function):
+    def wrapper(*args, **kwargs):
+        recv, send = multiprocessing.Pipe(False)
+        def no(*args, **kwargs):
+            args[-1].send(function(*args[:-1], **kwargs))
+        args = args + (send,)
+        #print(args)
+        process = multiprocessing.Process(target=no, args=args, kwargs=kwargs)
+        process.start()
+        return recv.recv()
+    return wrapper
 
+@multipro
+def test(x):
+    return sig(x)
 
 class Neuron():
     def __init__(self, inputs, operation):
@@ -99,7 +114,7 @@ class Neuron():
                 #print('setting random weight')
                 self.weight = 2 * random.random() - 1
             self.parent = parent
-            self.new_weight = None
+            self.new_weight = 2 * random.random() - 1
             self.dendrite = None
 
         def connect(self, dendrite):
@@ -108,23 +123,21 @@ class Neuron():
 
         @property
         def value(self):
+            #print(self.weight)
             return self.parent.value * self.weight
 
+        #@multipro
         def backprop(self, alpha):
-            #output_error_derivative = -(self.dendrite.target - self.dendrite.value)
             output_error_derivative = self.dendrite.net_derivative
-            #print('a : ', output_error_derivative)
             output_sig_der = self.dendrite.value * ( 1 - self.dendrite.value)
-            #print('b : ', output_sig_der)
             weight_derivative = 1 * self.parent.value * self.weight ** (1 - 1) + 0 + 0
-            #print('c : ', weight_derivative)
             delta_error = output_error_derivative * output_sig_der * weight_derivative
-            #delta_error = self.dendrite.net_derivative * output_sig_der * weight_derivative
-            #print(delta_error)
             self.new_weight = self.weight - alpha * delta_error
 
         def lock(self):
             self.weight = self.new_weight
+            if type(self.weight) is not type(float()):
+                print(self.new_weight)
 
 class Input(Neuron):
     def __init__(self, input=0.5):
@@ -197,8 +210,8 @@ class Net():
         try:
             for age in range(int(epoch)):
                 for datum in dataset:
+                    print('epoch is :', age, end="\r", flush=True)
                     self.train(datum)
-                print('epoch is :', age, end="\r", flush=True)
             print()
         except KeyboardInterrupt:
             print('wow rude')
@@ -214,10 +227,10 @@ class Net():
                     v_outputs = func(*v_inputs)
                 except:
                     continue
+                print('epoch is :', age, end="\r", flush=True)
                 v_outputs = self.make_iter(v_outputs)
                 #print('input = {}, output = {}'.format(v_inputs, v_outputs))
                 self.train([v_inputs, v_outputs])
-                print('epoch is :', age, end="\r", flush=True)
             print('training complete')
         except KeyboardInterrupt:
             print('wow rude')
@@ -240,11 +253,24 @@ class Net():
             assert len(actual) == len(should)
             v = []
             # should i average the error of all the inputs or get the error of the combined inputs
-            for a, s in zip(actual, should):
-                #v.append(abs(a - s) / a)
-                v.append(abs(a - s))
+            #a = int(''.cjoin(str(round(n)) for n in actual), 2)
+            #s = int(''.join(str(round(n)) for n in should), 2)
+            a = [self.extreme(num) for num in actual]
+            s = [self.extreme(num) for num in should]
+            #print(a)
+            #print(s)
 
-            ate.append(sum(v) / len(v))
+            #for a, s in zip(actual, should):
+                #v.append(abs(a - s) / a)
+                #v.append(abs(a - s))
+            #print(v)
+
+            if a == s:
+                ate.append(1)
+            else:
+                ate.append(0)
+
+            #ate.append(sum(v) / len(v))
             #print(v)
 
         #print(ate)
@@ -258,6 +284,10 @@ class Net():
             obj = [obj]
 
         return obj
+
+    @classmethod
+    def extreme(cls, value):
+        return abs(1e-15 - round(value))
 
     def random(self):
         if self.do_round:
