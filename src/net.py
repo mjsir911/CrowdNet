@@ -193,13 +193,6 @@ class Net():
 
         for output in self._outputs:
             output.target = next(ideal)
-            """
-        for neuron in self.t_neurons:
-        #for neuron in self._outputs:
-            for axon in neuron.terminals:
-                axon.backprop(self.eta)
-                """
-
         # here i want p2p
         [axon.backprop(self.eta) for axon in self.axons]
 
