@@ -2,7 +2,10 @@
 # -*- coding: utf-8 -*-
 
 import atexit
-import dill as pickle
+try:
+    import dll as pickle
+except ImportError:
+    import pickle
 import daemon
 
 __appname__     = ""
