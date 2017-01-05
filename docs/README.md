@@ -16,10 +16,12 @@ Tensorflow actually provides really nice neural network stuff [here](http://play
 If you want to experiment around, simply open up a python interpretive shell inside the [src](/src)
 
     import net
-    network = net.Net(learning_rate, [hidden neurons in 1 layer])
+    network = net.Net(learning_rate, num_input, [hidden neurons], num_output)
     network.train([inputs], [outputs]) # must know number of input and output neurons in code
     # or
-    network.mass_train(iterations, [[inputs], [outputs]])
+    network.mass_train([[inputs], [outputs]], iterations)
+    # or
+    network.function_train(func, iterations)
 
 The network is dumb as rocks but it can work logic gates pretty well!
 
