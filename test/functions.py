@@ -4,6 +4,7 @@
 import sys
 sys.path.insert(0, '../src')
 import net
+import cortex
 
 __appname__     = ""
 __author__      = "Marco Sirabella"
@@ -53,9 +54,12 @@ def math(*args):
 
 
 #divfull = net.Net(0.1, base * 2 + 2, [base + 6], base)
-divfull = net.Net(0.1, base * 2, [base + 4], base)
+#divfull = net.Net(0.1, base * 2, [base + 4], base)
+divfull = cortex.melt('dills/division')
+print('accuracy currently at', str(int(divfull.error(0.9) * 100)), '%')
+print('do functions.division(n, d) to try out division!')
 
-divfull.function_train(div, 1e6)
+#divfull.function_train(div, 1e6)
 
 def division(n, d):
     n = [int(num) for num in list(format(n, '0{}b'.format(base)))]
