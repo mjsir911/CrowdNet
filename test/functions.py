@@ -19,8 +19,6 @@ __module__      = ""
 
 base = 4
 
-#div = lambda *args: [int(z) for z in list(format(int(''.join(str(round(n)) for n in args[:base]), 2) // int(''.join(str(round(n)) for n in args[base:]), 2), '0{}b'.format(base)))]
-
 def mad(func):
     def wrapper(*args, **kwargs):
         first = int(''.join(str(round(n)) for n in args[:base]), 2)
@@ -53,8 +51,6 @@ def math(*args):
             """
 
 
-#divfull = net.Net(0.1, base * 2 + 2, [base + 6], base)
-#divfull = net.Net(0.1, base * 2, [base + 4], base)
 divfull = cortex.melt('dills/division')
 print('accuracy currently at', str(int(divfull.error(0.9) * 100)), '%')
 print('do functions.division(n, d) to try out division!')
@@ -69,3 +65,10 @@ def division(n, d):
     return o
 
 xnor = lambda a, b: int(a == b)
+
+def main():
+    while True:
+        print(division(int(input('numerator: ')), int(input('denominator: '))))
+
+if __name__ == '__main__':
+    main()
