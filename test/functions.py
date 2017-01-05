@@ -68,7 +68,12 @@ xnor = lambda a, b: int(a == b)
 
 def main():
     while True:
-        print(division(int(input('numerator: ')), int(input('denominator: '))))
+        numerator   = int(input('numerator: '))
+        denominator = int(input('denomerator: '))
+        ans = division(numerator, denominator)
+        print(ans)
+        if ans != numerator // denominator:
+            print('actual answer is: ', numerator // denominator)
 
 if __name__ == '__main__':
     main()
