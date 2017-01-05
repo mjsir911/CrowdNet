@@ -27,6 +27,8 @@ The network is dumb as rocks but it can work logic gates pretty well!
 
 _**[Python3](https://www.python.org/download/releases/3.0/)**_
 
+  pip3 install virtualenv
+
 ### Installing
 
 Installation is not particularly hard, due to the small nature of this project
@@ -41,15 +43,27 @@ next navigate to specified directory
 
 You should see the contents of the repository's filesystem
 
+Then run virtualenv
+
+  virtualenv venv
+
+And turn on the virtual environment
+
+  source venv/bin/activate
+
+Finally, install the required modules
+
+  pip3 install -r requirements.txt
+
 ## Running the tests
 
-To run the automated test, navigate to the test directory and run the threeXNOR.py file
+To run the automated test, navigate to the test directory: ``cd test`` and run the functions.py file
 
-    python3 threeXNOR.py
+    python3 functions.py
 
 or
 
-    ./threeXNOR.py
+    ./functions.py
 
 ## Deployment
 
