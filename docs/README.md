@@ -27,7 +27,7 @@ The network is dumb as rocks but it can work logic gates pretty well!
 
 _**[Python3](https://www.python.org/download/releases/3.0/)**_
 
-  pip3 install virtualenv
+    pip3 install virtualenv
 
 ### Installing
 
@@ -35,7 +35,7 @@ Installation is not particularly hard, due to the small nature of this project
 
 To get a working development environment setup, simply git clone this repository into a directory of each choice
 
-  git clone
+    git clone
 
 next navigate to specified directory
 
