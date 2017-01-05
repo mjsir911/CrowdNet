@@ -2,6 +2,8 @@
 # -*- coding: utf-8 -*-
 
 import random
+import test
+import time
 import math
 
 __appname__     = ""
@@ -22,7 +24,8 @@ def sig(x):
     return 1 / (1 + math.e ** -x)
 
 def unsig(x):
-    return math.log(x / (1 - x))
+    return math.log(x / (1 - x)) # this might break everything
+    #return math.log(x / abs(1 - x)) # this might break everything
 
 def error(ideal, actual):
     return (1/2) * (ideal - actual) ** 2
@@ -30,24 +33,6 @@ def error(ideal, actual):
 def node_delta(ideal, actual):
     return -(ideal - actual) * actual * (1 - actual)
     #return -(ideal - actual) * actual * (1 - out)
-
-
-import multiprocessing
-def multipro(function):
-    def wrapper(*args, **kwargs):
-        recv, send = multiprocessing.Pipe(False)
-        def no(*args, **kwargs):
-            args[-1].send(function(*args[:-1], **kwargs))
-        args = args + (send,)
-        #print(args)
-        process = multiprocessing.Process(target=no, args=args, kwargs=kwargs)
-        process.start()
-        return recv.recv()
-    return wrapper
-
-@multipro
-def test(x):
-    return sig(x)
 
 class Neuron():
     def __init__(self, inputs, operation):
@@ -126,13 +111,13 @@ class Neuron():
             #print(self.weight)
             return self.parent.value * self.weight
 
-        #@multipro
-        def backprop(self, alpha):
+        #@test.multipro
+        def backprop(self, eta):
             output_error_derivative = self.dendrite.net_derivative
             output_sig_der = self.dendrite.value * ( 1 - self.dendrite.value)
             weight_derivative = 1 * self.parent.value * self.weight ** (1 - 1) + 0 + 0
             delta_error = output_error_derivative * output_sig_der * weight_derivative
-            self.new_weight = self.weight - alpha * delta_error
+            self.new_weight = self.weight - eta * delta_error
 
         def lock(self):
             self.weight = self.new_weight
@@ -146,15 +131,17 @@ class Input(Neuron):
     class Dud():
         def __init__(self, value=0):
             self.value = unsig(value)
+            #self.value = value
         def connect(self, nah):
             pass
 
 
 class Net():
-    def __init__(self, alpha=0.5, input_neurons=3, hidden_neurons=[1], output_neurons = 2, do_round=True):
+    def __init__(self, eta, input_neurons, hidden_neurons, output_neurons, is_discrete=False):
         chain = []
-        self.do_round = do_round
-        self.alpha = alpha
+        self.sleep = 0
+        self.is_discrete=is_discrete
+        self.eta = eta
         self._inputs = [Input() for x in range(input_neurons)]
         chain.append(self._inputs)
 
@@ -173,7 +160,8 @@ class Net():
         chain.append(self._outputs)
         #print(chain)
 
-        self.neurons = self.hiddens + self._outputs
+        self.t_neurons = self.hiddens + self._outputs
+        self.neurons = self._inputs + self.t_neurons
 
     @property
     def inputs(self):
@@ -185,7 +173,12 @@ class Net():
         assert len(values) == len(self._inputs), 'not correct amount of inputs, provided {} inputs, need {} inputs'.format(len(values), len(self._inputs))
         values = iter(values)
         for neuron in self._inputs:
-            neuron.value = abs(1e-15 - next(values))
+            #neuron.value = abs(1e-15 - next(values))
+            if not self.is_discrete:
+                neuron.value = self.extreme(next(values))
+            else:
+                neuron.value =  self.unint(next(values))
+        time.sleep(self.sleep / 100)
 
     @property
     def outputs(self):
@@ -199,58 +192,73 @@ class Net():
 
         for output in self._outputs:
             output.target = next(ideal)
-        for neuron in self.neurons:
+        for neuron in self.t_neurons:
         #for neuron in self._outputs:
             for axon in neuron.terminals:
-                axon.backprop(self.alpha)
+                axon.backprop(self.eta)
 
-        [[axon.lock() for axon in neuron.terminals] for neuron in self.neurons] # no lock for now
+        [[axon.lock() for axon in neuron.terminals] for neuron in self.t_neurons] # no lock for now
 
     def mass_train(self, dataset, epoch):
         try:
             for age in range(int(epoch)):
-                for datum in dataset:
-                    print('epoch is :', age, end="\r", flush=True)
-                    self.train(datum)
+                datum = dataset[random.randint(0, len(dataset) - 1)]
+                print('epoch is :', age, end="\r", flush=True)
+                self.train(datum)
             print()
         except KeyboardInterrupt:
+            print()
             print('wow rude')
 
     def function_train(self, func, epoch):
         self.func = func
-        argcount = func.__code__.co_argcount
-        assert argcount == len(self.inputs), 'need different amount of inputs'
+        #argcount = func.__code__.co_argcount
+        argcount = len(self.inputs) # bad practs
+        #assert argcount == len(self.inputs), 'need different amount of inputs'
         try:
             for age in range(int(epoch)):
                 v_inputs  = [self.random() for x in range(argcount)]
+                print('epoch is :', age, end="\r", flush=True)
                 try:
                     v_outputs = func(*v_inputs)
-                except:
+                except Exception as e:
+                    print(e)
                     continue
-                print('epoch is :', age, end="\r", flush=True)
                 v_outputs = self.make_iter(v_outputs)
                 #print('input = {}, output = {}'.format(v_inputs, v_outputs))
                 self.train([v_inputs, v_outputs])
             print('training complete')
         except KeyboardInterrupt:
+            print()
             print('wow rude')
 
-    def error(self, accuracy, func=None, Exact=True):
-        if not func:
+    def error(self, accuracy, func=None, dataset=None, exact=True):
+        if dataset:
+            pass
+        elif func:
+            pass
+        else:
             func = self.func
         accuracy_repeat = unsig((accuracy) / 2 + 0.5) * 1e3
         ate = []
         for x in range(int(accuracy_repeat)):
-            self.inputs  = [self.random() for x in range(len(self._inputs))]
-            try:
-                should = [abs(1e-15 - num) for num in self.make_iter(func(*self.inputs))]
-            except:
-                continue
-            actual = self.outputs
+            if func:
+                self.inputs  = [self.random() for x in range(len(self._inputs))]
+                try:
+                    should = [self.extreme(num) for num in self.make_iter(func(*self.inputs))]
+                except:
+                    continue
+                actual = self.outputs
+            elif dataset:
+                datum = dataset[random.randint(0, len(dataset) - 1)]
+                self.inputs = datum[0]
+                should = datum[1]
+                actual = self.outputs
+
 
             #print(actual)
             #print(should)
-            assert len(actual) == len(should)
+            assert len(actual) == len(should), 'len is {} when should be {}'.format(len(actual), len(should))
             v = []
             # should i average the error of all the inputs or get the error of the combined inputs
             #a = int(''.cjoin(str(round(n)) for n in actual), 2)
@@ -282,13 +290,18 @@ class Net():
 
     @classmethod
     def extreme(cls, value):
-        return abs(1e-15 - round(value))
+        return cls.unint(round(value))
+        #return value
+
+    @classmethod
+    def unint(cls, value):
+        return abs(1e-15 - value)
 
     def random(self):
-        if self.do_round:
-            return round(random.random())
-        else:
+        if self.is_discrete:
             return random.random()
+        else:
+            return round(random.random())
 
 
 # Some patterns
