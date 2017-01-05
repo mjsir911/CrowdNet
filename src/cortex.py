@@ -3,10 +3,10 @@
 
 import atexit
 try:
-    import dll as pickle
+    import dill as pickle # dont make a typo
 except ImportError:
     import pickle
-import daemon
+#import daemon # wow
 
 __appname__     = ""
 __author__      = "Marco Sirabella"
