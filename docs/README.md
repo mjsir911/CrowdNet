@@ -45,15 +45,15 @@ You should see the contents of the repository's filesystem
 
 Then run virtualenv
 
-  virtualenv venv
+    virtualenv venv
 
 And turn on the virtual environment
 
-  source venv/bin/activate
+    source venv/bin/activate
 
 Finally, install the required modules
 
-  pip3 install -r requirements.txt
+    pip3 install -r requirements.txt
 
 ## Running the tests
 
