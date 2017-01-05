@@ -235,7 +235,7 @@ class Net():
         except KeyboardInterrupt:
             print('wow rude')
 
-    def error(self, accuracy, func=None):
+    def error(self, accuracy, func=None, Exact=True):
         if not func:
             func = self.func
         accuracy_repeat = unsig((accuracy) / 2 + 0.5) * 1e3
@@ -255,25 +255,20 @@ class Net():
             # should i average the error of all the inputs or get the error of the combined inputs
             #a = int(''.cjoin(str(round(n)) for n in actual), 2)
             #s = int(''.join(str(round(n)) for n in should), 2)
-            a = [self.extreme(num) for num in actual]
-            s = [self.extreme(num) for num in should]
-            #print(a)
-            #print(s)
-
-            #for a, s in zip(actual, should):
-                #v.append(abs(a - s) / a)
-                #v.append(abs(a - s))
-            #print(v)
-
-            if a == s:
-                ate.append(1)
+            if exact:
+                a = [self.extreme(num) for num in actual]
+                s = [self.extreme(num) for num in should]
+                if a == s:
+                    ate.append(1)
+                else:
+                    ate.append(0)
             else:
-                ate.append(0)
+                for a, s in zip(actual, should):
+                    v.append(abs(a - s) / a)
+                    v.append(abs(a - s))
 
-            #ate.append(sum(v) / len(v))
-            #print(v)
+                ate.append(sum(v) / len(v))
 
-        #print(ate)
         return(sum(ate)/len(ate))
 
     @classmethod
