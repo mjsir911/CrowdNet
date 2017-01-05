@@ -41,7 +41,7 @@ To get a working development environment setup, simply git clone this repository
 
 next navigate to specified directory
 
-    cd mydir
+    cd crowdnet
 
 You should see the contents of the repository's filesystem
 
@@ -56,6 +56,11 @@ And turn on the virtual environment
 Finally, install the required modules
 
     pip3 install -r requirements.txt
+
+###Note
+To get out of a virtualenv:
+    
+    deactivate
 
 ## Running the tests
 
