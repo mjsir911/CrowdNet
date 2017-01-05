@@ -162,6 +162,7 @@ class Net():
 
         self.t_neurons = self.hiddens + self._outputs
         self.neurons = self._inputs + self.t_neurons
+        self.axons = [axon for neuron in self.neurons for axon in neuron.axons]
 
     @property
     def inputs(self):
@@ -192,10 +193,15 @@ class Net():
 
         for output in self._outputs:
             output.target = next(ideal)
+            """
         for neuron in self.t_neurons:
         #for neuron in self._outputs:
             for axon in neuron.terminals:
                 axon.backprop(self.eta)
+                """
+
+        # here i want p2p
+        [axon.backprop(self.eta) for axon in self.axons]
 
         [[axon.lock() for axon in neuron.terminals] for neuron in self.t_neurons] # no lock for now
 
