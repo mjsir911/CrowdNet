@@ -25,7 +25,7 @@ The network is dumb as rocks but it can work logic gates pretty well!
 
 ### Prerequisities
 
-__[Python3](https://www.python.org/download/releases/3.0/)__
+_**[Python3](https://www.python.org/download/releases/3.0/)**_
 
 ### Installing
 
