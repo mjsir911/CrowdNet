@@ -75,8 +75,7 @@ class Server():
                 badpeer = peer
                 print('removing {} from phonebook due to {}'.format(badpeer, e))
                 self.phonebook.remove(badpeer)
-                for peer in self.phonebook:
-                    self.post('phonebook/remove', peer, badpeer)
+                self.mass_peer('phonebook/remove', badpeer)
 
                 continue
             #print('{} data from {}'.format(data, peer))
@@ -99,6 +98,7 @@ class Server():
         conn = http.client.HTTPConnection(*address)
         conn.connect()
         conn.request("GET", "/{}".format(path))
+        print('getting response from {} at path {}'.format(address, path))
         response = conn.getresponse()
         data = response.read()
         return cortex.extrospect(data)
@@ -109,6 +109,7 @@ class Server():
         conn.connect()
         #print('posting to ', address)
         conn.request("POST", "/{}".format(path), cortex.introspect(data))
+        print('posting response from {} at path {}'.format(address, path))
         response = conn.getresponse()
         data = response.read()
         #return cortex.introspect(data)
@@ -116,6 +117,8 @@ class Server():
 
     def mass_post(self, path, data):
         for peer in list(self.phonebook):
+            test.time.sleep(1)
+            #print('posting data to peer ', peer, ' at path ', path)
             self.post(path, peer, data)
 
     @property
@@ -162,6 +165,7 @@ class Server():
         # GET
         def do_GET(self):
             # Send response status code
+            #print('am i freezin up everything?', self.path)
             self.send_response(200)
 
             # Send headers
@@ -175,7 +179,7 @@ class Server():
                 rpath, rfunc = response
                 if path == rpath:
                     msg = rfunc(self)
-                    print('doing get function ', rfunc, ' to path ', path)
+                    #print('doing get function ', rfunc, ' to path ', path)
                     self.wfile.write(msg)
                     return
             print(path, self.g_responses)
@@ -185,6 +189,7 @@ class Server():
             return
 
         def do_POST(self):
+            #print('am i freezin up everything?', self.path)
             self.data = cortex.extrospect(self.rfile.read(int(self.headers["Content-Length"])))
             self.send_response(200)
             self.send_header("Content-Length", '0')
@@ -197,9 +202,10 @@ class Server():
                 #print(path, rpath)
                 if path == rpath:
                     rfunc(self)
-                    print('doing post function ', rfunc, ' to path ', path)
+                    #print('doing post function ', rfunc, ' to path ', path)
                     return
-            print('unknown path: ', self.path)
+            print('unknown path: ', path, type(path[0]), path[0])
+            print(self.p_responses)
             return
             """
             if path[0] == 'phonebook':
