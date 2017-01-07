@@ -29,7 +29,7 @@ class Server():
         # Server settings
         # Choose port 8080, for port 80, which is normally used for a http server, you need root access
         self.phonebook = phonebook
-        self.address = ('127.0.0.1', address[1])
+        self.address = address
         try:
             self.phonebook.remove(self.address)
         except KeyError:
