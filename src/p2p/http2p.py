@@ -37,8 +37,12 @@ class Server():
 
         def junk(s):
             self.obj = s.data
+        def add_phone(s):
+            self.phonebook.add((s.client_address[0], s.data))
+            print('adding peer ', s.client_address)
+
         self._obj = obj
-        self.Request.add_post_response(['phonebook'], lambda s: self.phonebook.add((s.client_address[0], s.data)))
+        self.Request.add_post_response(['phonebook'], add_phone)
         self.Request.add_post_response(['phonebook', 'remove'], lambda s: self.phonebook.remove(s.data))
         self.Request.add_post_response(['phonebook', 'add'], lambda s: self.equalize())
         self.Request.add_post_response(['dill', 'set'], junk)
