@@ -37,7 +37,7 @@ class Server():
 
         def junk(s):
             self.obj = s.data
-        self.obj = obj
+        self._obj = obj
         self.Request.add_post_response(['phonebook'], lambda s: self.phonebook.add((s.client_address[0], s.data)))
         self.Request.add_post_response(['phonebook', 'remove'], lambda s: self.phonebook.remove(s.data))
         self.Request.add_post_response(['phonebook', 'add'], lambda s: self.equalize())
