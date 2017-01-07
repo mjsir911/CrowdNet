@@ -56,8 +56,11 @@ class Server():
 
     @obj.setter
     def obj(self, obj):
-        self._obj = obj
-        self.mass_post('dill/set', obj)
+        if obj != self._obj:
+            self._obj = obj
+            self.mass_post('dill/set', obj)
+        else:
+            print('no feedback pls')
 
     def equalize(self):
         self.order
