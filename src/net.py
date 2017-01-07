@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import random
-#import test
+import test
 import time
 import math
 
@@ -109,6 +109,7 @@ class Neuron():
         @property
         def value(self):
             #print(self.weight)
+            #print(self.weight)
             return self.parent.value * self.weight
 
         #@test.multipro
@@ -118,11 +119,13 @@ class Neuron():
             weight_derivative = 1 * self.parent.value * self.weight ** (1 - 1) + 0 + 0
             delta_error = output_error_derivative * output_sig_der * weight_derivative
             self.new_weight = self.weight - eta * delta_error
+            return self.new_weight
 
         def lock(self):
             self.weight = self.new_weight
             if type(self.weight) is not type(float()):
-                print(self.new_weight)
+                #print(self.new_weight)
+                pass
 
 class Input(Neuron):
     def __init__(self, input=0.5):
@@ -137,7 +140,7 @@ class Input(Neuron):
 
 
 class Net():
-    def __init__(self, eta, input_neurons, hidden_neurons, output_neurons, is_discrete=False):
+    def __init__(self, eta, input_neurons, hidden_neurons, output_neurons, is_discrete=False, networked=False):
         chain = []
         self.sleep = 0
         self.is_discrete=is_discrete
@@ -162,7 +165,9 @@ class Net():
 
         self.t_neurons = self.hiddens + self._outputs
         self.neurons = self._inputs + self.t_neurons
-        self.axons = [axon for neuron in self.neurons for axon in neuron.axons]
+        self._axons = [axon for neuron in self.neurons for axon in neuron.axons]
+
+        self.a_queue = [False] * len(self._axons)
 
     @property
     def inputs(self):
@@ -185,7 +190,22 @@ class Net():
     def outputs(self):
         return [neuron.value for neuron in self._outputs]
 
-    def train(self, dataset):
+    @property
+    def axons(self):
+        return [axon.weight for axon in self._axons]
+
+    @axons.setter
+    def axons(self, data):
+        self.a_queue = test.truey([data] + [self.a_queue])
+        if all(self.a_queue):
+            #print('full of trueys')
+            print('locking in data')
+            for weight, axon in zip(self.a_queue, self._axons):
+                axon.weight = weight
+            self.a_queue = [False] * len(self._axons)
+
+    @test.timeme
+    def train(self, dataset, repeat=(0, 1)):
         """ [[inputs], [outputs]] """
         self.inputs = dataset[0]
         self.ideal  = dataset[1]
@@ -193,17 +213,28 @@ class Net():
 
         for output in self._outputs:
             output.target = next(ideal)
-        # here i want p2p
-        [axon.backprop(self.eta) for axon in self.axons]
 
-        [[axon.lock() for axon in neuron.terminals] for neuron in self.t_neurons] # no lock for now
+        """
+        if not axon_range:
+            axon_range = (0, len(self._axons))
+        """
+
+        # here i want p2p
+        data = [False] * len(self._axons)
+        for index, axon in zip(range(repeat[0], len(self._axons), repeat[1]), self._axons[repeat[0]::repeat[1]]):
+                data[index] = axon.backprop(self.eta)
+        """
+        data = [axon.backprop(self.eta) for axon in self._axons[axon_range[0] : axon_range[1]]]
+        data = [False] * axon_range[0] + data + [False] * (len(self._axons) - axon_range[1])
+        """
+        return data
 
     def mass_train(self, dataset, epoch):
         try:
             for age in range(int(epoch)):
                 datum = dataset[random.randint(0, len(dataset) - 1)]
                 print('epoch is :', age, end="\r", flush=True)
-                self.train(datum)
+                self.axons = self.train(datum)
             print()
         except KeyboardInterrupt:
             print()
@@ -225,7 +256,9 @@ class Net():
                     continue
                 v_outputs = self.make_iter(v_outputs)
                 #print('input = {}, output = {}'.format(v_inputs, v_outputs))
-                self.train([v_inputs, v_outputs])
+                many = 1
+                for offset in range(0, many):
+                    self.axons = self.train([v_inputs, v_outputs], (offset, many))
             print('training complete')
         except KeyboardInterrupt:
             print()
