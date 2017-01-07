@@ -171,7 +171,7 @@ class Server():
                 rpath, rfunc = response
                 if path == rpath:
                     msg = rfunc(self)
-                    print('doing function ', rfunc, ' to path ', path)
+                    print('doing get function ', rfunc, ' to path ', path)
                     self.wfile.write(msg)
                     return
             print(path, self.g_responses)
@@ -193,7 +193,7 @@ class Server():
                 #print(path, rpath)
                 if path == rpath:
                     rfunc(self)
-                    print('doing function ', rfunc, ' to path ', path)
+                    print('doing post function ', rfunc, ' to path ', path)
                     return
             print('unknown path: ', self.path)
             return
