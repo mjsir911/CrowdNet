@@ -36,7 +36,7 @@ class Server():
             pass
 
         def junk(s):
-            self.obj = cortex.extrospect(s.data)
+            self.obj = s.data
         self.obj = obj
         self.Request.add_post_response(['phonebook'], lambda s: self.phonebook.add((s.client_address[0], s.data)))
         self.Request.add_post_response(['phonebook', 'remove'], lambda s: self.phonebook.remove(s.data))
