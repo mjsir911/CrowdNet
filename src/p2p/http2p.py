@@ -35,10 +35,13 @@ class Server():
         except KeyError:
             pass
 
+        def junk(s):
+            self.obj = cortex.extrospect(s.data)
         self.obj = obj
         self.Request.add_post_response(['phonebook'], lambda s: self.phonebook.add((s.client_address[0], s.data)))
         self.Request.add_post_response(['phonebook', 'remove'], lambda s: self.phonebook.remove(s.data))
         self.Request.add_post_response(['phonebook', 'add'], lambda s: self.equalize())
+        self.Request.add_post_response(['dill', 'set'], junk)
 
         self.Request.add_get_response(['dill'], lambda s: cortex.introspect(self.obj))
         self.Request.add_get_response(['phonebook'], lambda s: cortex.introspect(self.phonebook))
@@ -46,6 +49,15 @@ class Server():
         self.httpd = http.server.HTTPServer(self.address, self.Request)
         self.serve()
         self.equalize()
+
+    @property
+    def obj(self):
+        return self._obj
+
+    @obj.setter
+    def obj(self, obj):
+        self._obj = obj
+        self.mass_post('dill/set', obj)
 
     def equalize(self):
         self.order
@@ -71,8 +83,7 @@ class Server():
             for phone in phonebook:
                 if phone != self.address:
                     # if new address, tell the rest there is a new address
-                    for peer2 in self.phonebook:
-                        self.post('phonebook/add', peer2, None)
+                    self.mass_post('phonebook/add', None)
                     self.phonebook.add(phone)
         return
 
@@ -95,6 +106,10 @@ class Server():
         data = response.read()
         #return cortex.introspect(data)
         return
+
+    def mass_post(self, path, data):
+        for peer in list(self.phonebook):
+            self.post(path, peer, data)
 
     @property
     def order(self):
