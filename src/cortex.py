@@ -32,3 +32,9 @@ def freeze(obj, f_name):
 
 def melt(f_name):
     return pickle.loads(open(f_name, 'rb').read())
+
+def introspect(self):
+    return pickle.dumps(self)
+
+def extrospect(data):
+    return pickle.loads(data)
