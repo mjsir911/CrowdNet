@@ -24,7 +24,7 @@ __module__      = ""
 
 class Server():
 
-    def __init__(self, obj=None, address=(socket.gethostbyname(socket.gethostname()), 8000), (phonebook={('127.0.0.1', 8000)}):
+    def __init__(self, obj=None, address=(socket.gethostbyname(socket.gethostname()), 8000), phonebook={('127.0.0.1', 8000)}):
     #def __init__(self, port):
         # Server settings
         # Choose port 8080, for port 80, which is normally used for a http server, you need root access
