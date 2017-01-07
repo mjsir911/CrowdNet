@@ -24,18 +24,18 @@ __module__      = ""
 
 class Server():
 
-    def __init__(self, port, phonebook={('127.0.0.1', 8000)}):
+    def __init__(self, obj=None, address=(socket.gethostbyname(socket.gethostname()), 8000), (phonebook={('127.0.0.1', 8000)}):
     #def __init__(self, port):
         # Server settings
         # Choose port 8080, for port 80, which is normally used for a http server, you need root access
         self.phonebook = phonebook
-        self.address = ('127.0.0.1', port)
+        self.address = ('127.0.0.1', address[1])
         try:
             self.phonebook.remove(self.address)
         except KeyError:
             pass
 
-        self.obj = None
+        self.obj = obj
         self.Request.add_post_response(['phonebook'], lambda s: self.phonebook.add((s.client_address[0], s.data)))
         self.Request.add_post_response(['phonebook', 'remove'], lambda s: self.phonebook.remove(s.data))
         self.Request.add_post_response(['phonebook', 'add'], lambda s: self.equalize())
