@@ -33,6 +33,7 @@ class Server():
         else:
             pub_ip = self.get('/https://github.com/mjsir911/CrowdNet', ('ip.42.pl', 80))
             self.address = pub_ip, address[1]
+        self.local_address = address
         try:
             self.phonebook.remove(self.address)
         except KeyError:
@@ -55,8 +56,7 @@ class Server():
         self.Request.add_get_response(['dill'], lambda s: cortex.introspect(self._obj))
         self.Request.add_get_response(['phonebook'], lambda s: cortex.introspect(self.phonebook))
 
-        print('trying to bind to address ', address)
-        self.httpd = http.server.HTTPServer(address, self.Request)
+        self.httpd = http.server.HTTPServer(self.local_address, self.Request)
         self.httpd.request_queue_size = 100
         self.serve()
         self.equalize()
