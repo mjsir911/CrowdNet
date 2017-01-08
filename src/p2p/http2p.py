@@ -28,7 +28,11 @@ class Server():
     #def __init__(self, port):
         # Server settings
         self.phonebook = {(socket.gethostbyname(addr), port) for addr, port in phonebook} # who woulda thought
-        self.address = address
+        if address[0] == 'localhost' or address[0] == '127.0.0.1':
+            self.address = address
+        else:
+            pub_ip = self.get('/https://github.com/mjsir911/CrowdNet', ('ip.42.pl', 80))
+            self.address = pub_ip, address[1]
         try:
             self.phonebook.remove(self.address)
         except KeyError:
@@ -107,7 +111,11 @@ class Server():
         print('getting response from {} at path {}'.format(address, path))
         response = conn.getresponse()
         data = response.read()
-        return cortex.extrospect(data)
+        try:
+            data = cortex.extrospect(data)
+        except:
+            data = data.decode()
+        return data
 
     @classmethod
     def post(cls, path, address, data):
