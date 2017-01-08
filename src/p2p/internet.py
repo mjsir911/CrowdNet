@@ -153,7 +153,7 @@ class RIP(http2p.Server):
                 self.data = [False]
                 self.bad = True
                 print('bad = ', self.bad)
-                print(len(data))
+                print('recieved data with length of', len(data))
             #print(path, data)
             for response in self.responses:
                 rpath, rfunc = response
