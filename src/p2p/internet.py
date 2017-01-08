@@ -144,16 +144,20 @@ class RIP(http2p.Server):
             #data = self.request[0].strip()
             #socket = self.request[1]
             data = self.request[0]
-            data = data.split(chr(30).encode())
+            print('recieved data with length of', len(data))
+            data = data.split(chr(30).encode(), 1)
             try:
                 path = cortex.extrospect(data[0])
                 self.data = cortex.extrospect(data[1])
             except struct.error:
                 #print('bad thing')
-                self.data = [False]
+                try:
+                    self.data = data.decode()
+                except:
+                    self.data = data
+                    print(self.data)
                 self.bad = True
                 print('bad = ', self.bad)
-            print('recieved data with length of', len(data))
             #print(path, data)
             for response in self.responses:
                 rpath, rfunc = response
