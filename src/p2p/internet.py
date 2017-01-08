@@ -42,7 +42,7 @@ class RIP(http2p.Server):
         self.serve_udp()
 
         def got_data(s):
-            print('got processed data: ', s.data)
+            #print('got processed data: ', s.data)
             self.obj.axons = s.data
         self.UDPHandler.add_udp_response(['train', 'got'], got_data)
 
