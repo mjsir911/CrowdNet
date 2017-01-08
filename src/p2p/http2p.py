@@ -36,7 +36,9 @@ class Server():
             pass
 
         def junk(s):
-            self.obj = s.data
+            self._obj = s.data
+            #print('i "set" it')
+
         def add_phone(s):
             self.phonebook.add((s.client_address[0], s.data))
             print('adding peer ', s.client_address)
@@ -47,20 +49,23 @@ class Server():
         self.Request.add_post_response(['phonebook', 'add'], lambda s: self.equalize(True))
         self.Request.add_post_response(['dill', 'set'], junk)
 
-        self.Request.add_get_response(['dill'], lambda s: cortex.introspect(self.obj))
+        self.Request.add_get_response(['dill'], lambda s: cortex.introspect(self._obj))
         self.Request.add_get_response(['phonebook'], lambda s: cortex.introspect(self.phonebook))
 
         self.httpd = http.server.HTTPServer(self.address, self.Request)
+        self.httpd.request_queue_size = 100
         self.serve()
         self.equalize()
 
     @property
     def obj(self):
+        #print('recursive2?')
         return self._obj
 
     @obj.setter
     def obj(self, obj):
         if obj != self._obj:
+            print('recursive?')
             self._obj = obj
             self.mass_post('dill/set', obj)
         else:
@@ -71,11 +76,12 @@ class Server():
         for peer in list(self.phonebook):
             try:
                 data = self.get('dill', peer)
+                #data = None
             except ConnectionError as e:
                 badpeer = peer
                 print('removing {} from phonebook due to {}'.format(badpeer, e))
                 self.phonebook.remove(badpeer)
-                self.mass_peer('phonebook/remove', badpeer)
+                self.mass_post('phonebook/remove', badpeer)
 
                 continue
             #print('{} data from {}'.format(data, peer))
@@ -90,7 +96,7 @@ class Server():
                 for phone in phonebook:
                     if phone != self.address:
                         # if new address, tell the rest there is a new address
-                        self.mass_post('phonebook/add', None)
+                        #self.mass_post('phonebook/add', None)
                         self.phonebook.add(phone)
         return
 
@@ -118,7 +124,7 @@ class Server():
 
     def mass_post(self, path, data):
         for peer in list(self.phonebook):
-            test.time.sleep(1)
+            #test.time.sleep(10)
             #print('posting data to peer ', peer, ' at path ', path)
             self.post(path, peer, data)
 

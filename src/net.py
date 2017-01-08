@@ -169,6 +169,18 @@ class Net():
 
         self.a_queue = [False] * len(self._axons)
 
+    def __eq__(self, other):
+        if not isinstance(self, type(other)):
+            return False
+        if self.inputs != other.inputs:
+            return False
+        if self.outputs != other.outputs:
+            return False
+        if self.axons != other.axons:
+            return False
+
+        return True
+
     @property
     def inputs(self):
         return [neuron.value for neuron in self._inputs]
@@ -199,12 +211,12 @@ class Net():
         self.a_queue = test.truey([data] + [self.a_queue])
         if all(self.a_queue):
             #print('full of trueys')
-            print('locking in data')
+            #print('locking in data')
             for weight, axon in zip(self.a_queue, self._axons):
                 axon.weight = weight
             self.a_queue = [False] * len(self._axons)
 
-    @test.timeme
+    #@test.timeme
     def train(self, dataset, repeat=(0, 1)):
         """ [[inputs], [outputs]] """
         self.inputs = dataset[0]
@@ -240,6 +252,7 @@ class Net():
             print()
             print('wow rude')
 
+    @test.timeme
     def function_train(self, func, epoch):
         self.func = func
         #argcount = func.__code__.co_argcount
