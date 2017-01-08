@@ -113,6 +113,7 @@ class RIP(http2p.Server):
         sep = chr(30).encode()
         msg = cortex.introspect(msg)
         full = path + sep + msg
+        print('sending data with len of ', len(full))
         self.udp_sock.sendto(full, addr)
 
     def mass_udp(self, path, data):
@@ -151,6 +152,8 @@ class RIP(http2p.Server):
                 #print('bad thing')
                 self.data = [False]
                 self.bad = True
+                print('bad = ', self.bad)
+                print(len(data))
             #print(path, data)
             for response in self.responses:
                 rpath, rfunc = response
