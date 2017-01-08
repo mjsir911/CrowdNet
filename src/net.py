@@ -58,7 +58,7 @@ class Neuron():
     @value.setter
     def value(self, value):
         try:
-            self.terminals = [self.Dud(value)]
+            self.terminals = [Dud(value)]
         except AttributeError:
             raise
 
@@ -86,57 +86,57 @@ class Neuron():
 
 
     def Axon(self, *args):
-        new = self._Axon(self, *args)
+        new = _Axon(self, *args)
         self.axons.append(new)
         return new
 
-    class _Axon():
-        def __init__(self, parent, weight=0):
-            if weight:
-                self.weight = weight
-                #print('setting weight to {}'.format(weight))
-            else:
-                #print('setting random weight')
-                self.weight = 2 * random.random() - 1
-            self.parent = parent
-            self.new_weight = 2 * random.random() - 1
-            self.dendrite = None
+class _Axon():
+    def __init__(self, parent, weight=0):
+        if weight:
+            self.weight = weight
+            #print('setting weight to {}'.format(weight))
+        else:
+            #print('setting random weight')
+            self.weight = 2 * random.random() - 1
+        self.parent = parent
+        self.new_weight = 2 * random.random() - 1
+        self.dendrite = None
 
-        def connect(self, dendrite):
-            assert not self.dendrite
-            self.dendrite = dendrite
+    def connect(self, dendrite):
+        assert not self.dendrite
+        self.dendrite = dendrite
 
-        @property
-        def value(self):
-            #print(self.weight)
-            #print(self.weight)
-            return self.parent.value * self.weight
+    @property
+    def value(self):
+        #print(self.weight)
+        #print(self.weight)
+        return self.parent.value * self.weight
 
-        #@test.multipro
-        def backprop(self, eta):
-            output_error_derivative = self.dendrite.net_derivative
-            output_sig_der = self.dendrite.value * ( 1 - self.dendrite.value)
-            weight_derivative = 1 * self.parent.value * self.weight ** (1 - 1) + 0 + 0
-            delta_error = output_error_derivative * output_sig_der * weight_derivative
-            self.new_weight = self.weight - eta * delta_error
-            return self.new_weight
+    #@test.multipro
+    def backprop(self, eta):
+        output_error_derivative = self.dendrite.net_derivative
+        output_sig_der = self.dendrite.value * ( 1 - self.dendrite.value)
+        weight_derivative = 1 * self.parent.value * self.weight ** (1 - 1) + 0 + 0
+        delta_error = output_error_derivative * output_sig_der * weight_derivative
+        self.new_weight = self.weight - eta * delta_error
+        return self.new_weight
 
-        def lock(self):
-            self.weight = self.new_weight
-            if type(self.weight) is not type(float()):
-                #print(self.new_weight)
-                pass
+    def lock(self):
+        self.weight = self.new_weight
+        if type(self.weight) is not type(float()):
+            #print(self.new_weight)
+            pass
 
 class Input(Neuron):
     def __init__(self, input=0.5):
-        super().__init__([self.Dud(input)], lambda a: a)
+        super().__init__([Dud(input)], lambda a: a)
 
-    class Dud():
-        def __init__(self, value=0):
-            self.value = unsig(value)
-            #self.value = value
-        def connect(self, nah):
-            pass
+class Dud():
+    def __init__(self, value=0):
+        self.value = unsig(value)
+        #self.value = value
+    def connect(self, nah):
+        pass
 
 
 class Net():
