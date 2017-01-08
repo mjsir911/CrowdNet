@@ -26,6 +26,18 @@ def timeme(method):
 
     return wrapper
 
+def timemeavg(method):
+    def wrapper(*args, **kwargs):
+        startTime = time.time() * 1000
+        result = method(*args, **kwargs)
+        endTime = time.time() * 1000
+
+        time_took = endTime - startTime
+        #print(endTime - startTime, 'ms')
+        return result, time_took
+
+    return wrapper
+
 def multipro(function):
     def wrapper(*args, **kwargs):
         recv, send = multiprocessing.Pipe(False)
