@@ -95,6 +95,8 @@ class RIP(http2p.Server):
                     print('oh no')
                     self.UDPHandler.bad == False
                     continue
+                if old_axons == self.obj.axons:
+                    print('somethings not right-- freezing up')
                 endTime = time.time() * 1000
                 self.total_age += 1
                 age += 1
