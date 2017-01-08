@@ -95,6 +95,7 @@ class RIP(http2p.Server):
                     self.UDPHandler.bad == False
                     continue
                 endTime = time.time() * 1000
+                self.total_age += 1
                 age += 1
                 avg = (avg * age + (endTime - startTime)) / (age + 1)
                 print('avg is :', avg / len(self.obj.axons), end="\r", flush=True)
@@ -102,7 +103,6 @@ class RIP(http2p.Server):
         except KeyboardInterrupt:
             print()
             print('wow rude')
-        self.total_age += age
 
     def udp_client(self, path, msg, addr):
         path = cortex.introspect(path.split('/'))
