@@ -37,7 +37,8 @@ class RIP(http2p.Server):
         super().__init__(*args, **kwargs)
         self.total_age = 0
         self.udp_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        self.UDP = socketserver.UDPServer(self.address, self.UDPHandler)
+        print('trying to bind to address ', self.local_address)
+        self.UDP = socketserver.UDPServer(self.local_address, self.UDPHandler)
         self.serve_udp()
 
         def got_data(s):
