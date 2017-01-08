@@ -35,6 +35,7 @@ class Hi(http2p.Server):
 class RIP(http2p.Server):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.total_age = 0
         self.udp_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.UDP = socketserver.UDPServer(self.address, self.UDPHandler)
         self.serve_udp()
@@ -72,6 +73,9 @@ class RIP(http2p.Server):
         try:
             age = 0
             while age < epoch:
+                if self.obj.error(0.1) > 0.95:
+                    print('accuracy above 0.95 in {} epochs, breaking'.format(self.total_age))
+                    break
                 startTime = time.time() * 1000
                 old_axons = self.obj.axons
                 v_inputs  = [self.obj.random() for x in range(argcount)]
@@ -93,11 +97,12 @@ class RIP(http2p.Server):
                 endTime = time.time() * 1000
                 age += 1
                 avg = (avg * age + (endTime - startTime)) / (age + 1)
-                print('avg is :', avg, end="\r", flush=True)
+                print('avg is :', avg / len(self.obj.axons), end="\r", flush=True)
             print('training complete')
         except KeyboardInterrupt:
             print()
             print('wow rude')
+        self.total_age += age
 
     def udp_client(self, path, msg, addr):
         path = cortex.introspect(path.split('/'))
