@@ -44,7 +44,7 @@ class Server():
         self._obj = obj
         self.Request.add_post_response(['phonebook'], add_phone)
         self.Request.add_post_response(['phonebook', 'remove'], lambda s: self.phonebook.remove(s.data))
-        self.Request.add_post_response(['phonebook', 'add'], lambda s: self.equalize())
+        self.Request.add_post_response(['phonebook', 'add'], lambda s: self.equalize(True))
         self.Request.add_post_response(['dill', 'set'], junk)
 
         self.Request.add_get_response(['dill'], lambda s: cortex.introspect(self.obj))
@@ -66,7 +66,7 @@ class Server():
         else:
             print('no feedback pls')
 
-    def equalize(self):
+    def equalize(self, recursive=False):
         self.order
         for peer in list(self.phonebook):
             try:
@@ -86,11 +86,12 @@ class Server():
                 #print('{} has no network'.format(peer))
             phonebook = self.get('phonebook', peer)
             self.post('phonebook', peer, self.address[1])
-            for phone in phonebook:
-                if phone != self.address:
-                    # if new address, tell the rest there is a new address
-                    self.mass_post('phonebook/add', None)
-                    self.phonebook.add(phone)
+            if not recursive:
+                for phone in phonebook:
+                    if phone != self.address:
+                        # if new address, tell the rest there is a new address
+                        self.mass_post('phonebook/add', None)
+                        self.phonebook.add(phone)
         return
 
     @classmethod
