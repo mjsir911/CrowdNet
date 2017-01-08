@@ -55,7 +55,7 @@ class Server():
         self.Request.add_get_response(['dill'], lambda s: cortex.introspect(self._obj))
         self.Request.add_get_response(['phonebook'], lambda s: cortex.introspect(self.phonebook))
 
-        self.httpd = http.server.HTTPServer(self.address, self.Request)
+        self.httpd = http.server.HTTPServer(address, self.Request)
         self.httpd.request_queue_size = 100
         self.serve()
         self.equalize()
