@@ -56,7 +56,7 @@ class RIP(http2p.Server):
         #print('training with ', dataset)
         processed = self.obj.train(dataset, (self.place, len(self.order)))
         self.obj.axons = processed
-        #print('sending processed queue: ', processed)
+        print('sending processed queue: ', processed)
         #http2p.test.time.sleep(random.random() + 1 / 10)
         self.mass_udp('train/got', processed)
 
