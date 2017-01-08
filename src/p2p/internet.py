@@ -4,6 +4,7 @@
 
 import socketserver
 import socket
+import time
 import struct
 import http2p
 import net
@@ -62,8 +63,8 @@ class RIP(http2p.Server):
         self.mass_udp('train/start', dataset)
         self.process(dataset)
 
-    @test.timeme
     def function_train(self, func, epoch):
+        avg = 0
         self.obj.func = func
         #argcount = func.__code__.co_argcount
         argcount = len(self.obj.inputs) # bad practs
@@ -71,9 +72,10 @@ class RIP(http2p.Server):
         try:
             age = 0
             while age < epoch:
+                startTime = time.time() * 1000
                 old_axons = self.obj.axons
                 v_inputs  = [self.obj.random() for x in range(argcount)]
-                print('epoch is :', age, end="\r", flush=True)
+                #print('epoch is :', age, end="\r", flush=True)
                 try:
                     v_outputs = func(*v_inputs)
                 except Exception as e:
@@ -88,7 +90,10 @@ class RIP(http2p.Server):
                     print('oh no')
                     self.UDPHandler.bad == False
                     continue
+                endTime = time.time() * 1000
                 age += 1
+                avg = (avg * age + (endTime - startTime)) / (age + 1)
+                print('avg is :', avg, end="\r", flush=True)
             print('training complete')
         except KeyboardInterrupt:
             print()
