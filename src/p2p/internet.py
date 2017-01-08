@@ -23,18 +23,10 @@ __email__       = "msirabel@gmail.com"
 __status__      = "Prototype"  # "Prototype", "Development" or "Production"
 __module__      = ""
 
-class Hi(http2p.Server):
-    def __init__(self, *args, **kwargs):
-
-        self.a_queue = []
-
-        super().__init__(*args, **kwargs)
-
-    #@test.threaded
-
 class RIP(http2p.Server):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, verbose=True, **kwargs):
         super().__init__(*args, **kwargs)
+        self.verbose = verbose
         self.total_age = 0
         self.udp_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         print('trying to bind to address ', self.local_address)
@@ -42,29 +34,35 @@ class RIP(http2p.Server):
         self.serve_udp()
 
         def got_data(s):
-            #print('got processed data: ', s.data)
+            if self.verbose:
+                print('got processed data: ', s.data)
             self.obj.axons = s.data
         self.UDPHandler.add_udp_response(['train', 'got'], got_data)
 
         def process_data(s):
-            #print('got dataset: ', s.data, 'starting processing')
+            if self.verbose:
+                print('got dataset: ', s.data, 'starting processing')
             self.process(s.data)
         self.UDPHandler.add_udp_response(['train', 'start'], process_data)
 
 
     def process(self, dataset):
-        #print('training with ', dataset)
+        if self.verbose:
+            print('training with ', dataset)
         processed = self.obj.train(dataset, (self.place, len(self.order)))
         self.obj.axons = processed
-        #print('sending processed queue: ', processed)
+        if self.verbose:
+            print('sending processed queue: ', processed)
         #http2p.test.time.sleep(random.random() + 1 / 10)
         self.mass_udp('train/got', processed)
 
     def train(self, dataset):
-        #print('sending start for', dataset)
+        if self.verbose:
+            print('sending start for', dataset)
         self.mass_udp('train/start', dataset)
         self.process(dataset)
 
+    @test.timeme
     def function_train(self, func, epoch):
         avg = 0
         self.obj.func = func
@@ -95,14 +93,17 @@ class RIP(http2p.Server):
                     print('oh no')
                     self.UDPHandler.bad == False
                     continue
-                if old_axons == self.obj.axons:
-                    print('somethings not right-- freezing up')
+                while old_axons == self.obj.axons:
+                    print('waiting for other data')
+                    pass
                 endTime = time.time() * 1000
                 self.total_age += 1
                 age += 1
                 avg = (avg * age + (endTime - startTime)) / (age + 1)
                 print('avg is :', avg / len(self.obj.axons), end="\r", flush=True)
+            print()
             print('training complete')
+            print('average time: ', avg * age)
         except KeyboardInterrupt:
             print()
             print('wow rude')
