@@ -50,7 +50,12 @@ class RIP(http2p.Server):
     def process(self, dataset):
         if self.verbose:
             print('training with ', dataset)
-        processed = self.obj.train(dataset, (self.place, len(self.order)))
+        if len(self.order) > len(self.obj.axons):
+            processors = len(self.obj.axons)
+        else:
+            processors = len(self.order)
+
+        processed = self.obj.train(dataset, (self.place % processors, processors))
         self.obj.axons = processed
         if self.verbose:
             print('sending processed queue: ', processed)
