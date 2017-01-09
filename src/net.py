@@ -258,7 +258,7 @@ class Net():
                 assert False
                 raise
         else:
-            func = self.obj.func
+            func = self.func
         self.func = func
         #argcount = func.__code__.co_argcount
         argcount = len(self.inputs) # bad practs
