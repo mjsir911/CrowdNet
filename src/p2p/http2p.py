@@ -40,17 +40,24 @@ class Server():
             pass
 
         def junk(s):
+            print('i "set" it')
             self._obj = s.data
-            #print('i "set" it')
 
-        def add_phone(s):
-            self.phonebook.add((s.client_address[0], s.data))
-            print('adding peer ', s.client_address)
+        def new_phone(s):
+            addr = (s.client_address[0], s.data)
+            if addr not in self.phonebook:
+                print('adding peer ', addr)
+                self.phonebook.add((s.client_address[0], s.data))
+                self.mass_post('phonebook/add', addr)
+
+        def add(s):
+            if s.data != self.address:
+                self.phonebook.add(s.data)
 
         self._obj = obj
-        self.Request.add_post_response(['phonebook'], add_phone)
+        self.Request.add_post_response(['phonebook'], new_phone)
         self.Request.add_post_response(['phonebook', 'remove'], lambda s: self.phonebook.remove(s.data))
-        self.Request.add_post_response(['phonebook', 'add'], lambda s: self.equalize(True))
+        self.Request.add_post_response(['phonebook', 'add'], add)
         self.Request.add_post_response(['dill', 'set'], junk)
 
         self.Request.add_get_response(['dill'], lambda s: cortex.introspect(self._obj))
@@ -77,32 +84,45 @@ class Server():
 
     def equalize(self, recursive=False):
         self.order
-        for peer in list(self.phonebook):
+        change = False
+        oldphonebook = list(self.phonebook)
+        for peer in oldphonebook:
             try:
                 data = self.get('dill', peer)
                 #data = None
             except ConnectionError as e:
+                change = True
                 badpeer = peer
                 print('removing {} from phonebook due to {}'.format(badpeer, e))
                 self.phonebook.remove(badpeer)
                 self.mass_post('phonebook/remove', badpeer)
-
                 continue
+
             #print('{} data from {}'.format(data, peer))
             if data:
                 self.obj = data
             else:
                 pass
                 #print('{} has no network'.format(peer))
-            phonebook = self.get('phonebook', peer)
-            self.post('phonebook', peer, self.address[1])
+
             if not recursive:
-                for phone in phonebook:
-                    if phone != self.address:
-                        # if new address, tell the rest there is a new address
-                        #self.mass_post('phonebook/add', None)
-                        self.phonebook.add(phone)
-        return
+                phonebook = self.get('phonebook', peer)
+            #else:
+                #phonebook = self.phonebook
+
+            if not recursive:
+                self.post('phonebook', peer, self.address[1])
+
+            for phone in phonebook:
+                if phone != self.address:
+                    print(phone)
+                    # if new address, tell the rest there is a new address
+                    #self.mass_post('phonebook/add', phone)
+                    self.phonebook.add(phone)
+
+        #print(oldphonebook, list(self.phonebook))
+        print('difference: ', set(oldphonebook) - self.phonebook)
+        return change
 
     @classmethod
     def get(cls, path, address):
@@ -134,7 +154,10 @@ class Server():
         for peer in list(self.phonebook):
             #test.time.sleep(10)
             #print('posting data to peer ', peer, ' at path ', path)
-            self.post(path, peer, data)
+            try:
+                self.post(path, peer, data)
+            except ConnectionError as e:
+                print('{} is badpeer'.format(peer, e))
 
     @property
     def order(self):
