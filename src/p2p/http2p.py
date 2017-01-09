@@ -24,7 +24,7 @@ __module__      = ""
 
 class Server():
 
-    def __init__(self, obj=None, address=(socket.gethostbyname(socket.gethostname()), 37598), phonebook={('sirabella.org', 6702)}, local=True):
+    def __init__(self, obj=None, address=(socket.gethostbyname(socket.gethostname()), 37598), phonebook={('192.168.1.42', 8000)}, local=True):
     #def __init__(self, port):
         # Server settings
         self.phonebook = {(socket.gethostbyname(addr), port) for addr, port in phonebook} # who woulda thought
