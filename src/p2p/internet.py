@@ -101,13 +101,13 @@ class RIP(http2p.Server):
                     if self.verbose:
                         print('waiting for other data')
                     wait += 1
-                    if wait > len(self.phonebook) * 6500:
-                        self.equalize()
+                    if wait > len(self.phonebook) * 7000:
                         retry = True
                         break
                 if wait > max_wait:
                     max_wait = wait
                 if retry:
+                    self.equalize()
                     print('timed out, equalized and retrying')
                     continue
                 self.total_age += 1
