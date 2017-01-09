@@ -140,9 +140,10 @@ class Dud():
 
 
 class Net():
-    def __init__(self, eta, input_neurons, hidden_neurons, output_neurons, is_discrete=False, networked=False):
+    def __init__(self, eta, input_neurons, hidden_neurons, output_neurons, is_discrete=False, func=None):
         chain = []
         self.sleep = 0
+        self.func = func
         self.is_discrete=is_discrete
         self.eta = eta
         self._inputs = [Input() for x in range(input_neurons)]
@@ -216,7 +217,6 @@ class Net():
                 axon.weight = weight
             self.a_queue = [False] * len(self._axons)
 
-    #@test.timeme
     def train(self, dataset, repeat=(0, 1)):
         """ [[inputs], [outputs]] """
         self.inputs = dataset[0]
@@ -235,10 +235,6 @@ class Net():
         data = [False] * len(self._axons)
         for index, axon in zip(range(repeat[0], len(self._axons), repeat[1]), self._axons[repeat[0]::repeat[1]]):
                 data[index] = axon.backprop(self.eta)
-        """
-        data = [axon.backprop(self.eta) for axon in self._axons[axon_range[0] : axon_range[1]]]
-        data = [False] * axon_range[0] + data + [False] * (len(self._axons) - axon_range[1])
-        """
         return data
 
     def mass_train(self, dataset, epoch):
@@ -253,7 +249,16 @@ class Net():
             print('wow rude')
 
     @test.timeme
-    def function_train(self, func, epoch):
+    def function_train(self, epoch, func=None):
+        if func:
+            if self.func:
+                self.func = func
+            else:
+                print('set a function')
+                assert False
+                raise
+        else:
+            func = self.obj.func
         self.func = func
         #argcount = func.__code__.co_argcount
         argcount = len(self.inputs) # bad practs
