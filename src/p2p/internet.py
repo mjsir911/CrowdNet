@@ -30,6 +30,7 @@ class RIP(http2p.Server):
         self.total_age = 0
         self.udp_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         print('trying to bind to address ', self.local_address)
+        self.UDPHandler.verbose = self.verbose
         self.UDP = socketserver.UDPServer(self.local_address, self.UDPHandler)
         self.serve_udp()
 
@@ -71,6 +72,7 @@ class RIP(http2p.Server):
         #assert argcount == len(self.inputs), 'need different amount of inputs'
         try:
             age = 0
+            max_wait = 0
             while age < epoch:
                 if self.obj.error(0.1) > 0.95:
                     print('accuracy above 0.95 in {} epochs, breaking'.format(self.total_age))
@@ -93,17 +95,30 @@ class RIP(http2p.Server):
                     print('oh no')
                     self.UDPHandler.bad == False
                     continue
+                wait = 0
+                retry = False
                 while old_axons == self.obj.axons:
-                    print('waiting for other data')
-                    pass
-                endTime = time.time() * 1000
+                    if self.verbose:
+                        print('waiting for other data')
+                    wait += 1
+                    if wait > len(self.phonebook) * 6500:
+                        self.equalize()
+                        retry = True
+                        break
+                if wait > max_wait:
+                    max_wait = wait
+                if retry:
+                    print('timed out, equalized and retrying')
+                    continue
                 self.total_age += 1
                 age += 1
+                endTime = time.time() * 1000
                 avg = (avg * age + (endTime - startTime)) / (age + 1)
                 print('avg is :', avg / len(self.obj.axons), end="\r", flush=True)
             print()
             print('training complete')
             print('average time: ', avg * age)
+            print('maximum wait iterations: ', max_wait)
         except KeyboardInterrupt:
             print()
             print('wow rude')
@@ -113,7 +128,8 @@ class RIP(http2p.Server):
         sep = chr(30).encode()
         msg = cortex.introspect(msg)
         full = path + sep + msg
-        print('sending data with len of ', len(full))
+        if self.verbose:
+            print('sending data with len of ', len(full))
         self.udp_sock.sendto(full, addr)
 
     def mass_udp(self, path, data):
@@ -129,6 +145,7 @@ class RIP(http2p.Server):
         self.UDP.serve_forever()
 
     class UDPHandler(socketserver.BaseRequestHandler):
+        verbose = None
         bad = False
         """
         This class works similar to the TCP handler class, except that
@@ -144,7 +161,8 @@ class RIP(http2p.Server):
             #data = self.request[0].strip()
             #socket = self.request[1]
             data = self.request[0]
-            print('recieved data with length of', len(data))
+            if self.verbose:
+                print('recieved data with length of', len(data))
             data = data.split(chr(30).encode(), 1)
             try:
                 path = cortex.extrospect(data[0])
@@ -155,9 +173,11 @@ class RIP(http2p.Server):
                     self.data = data.decode()
                 except:
                     self.data = data
-                    print(self.data)
+                    if self.verbose:
+                        print(self.data)
                 self.bad = True
-                print('bad = ', self.bad)
+                if self.verbose:
+                    print('bad = ', self.bad)
             #print(path, data)
             for response in self.responses:
                 rpath, rfunc = response
