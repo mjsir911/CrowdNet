@@ -268,7 +268,7 @@ class Net():
                 v_inputs  = [self.random() for x in range(argcount)]
                 print('epoch is :', age, end="\r", flush=True)
                 try:
-                    v_outputs = func(*v_inputs)
+                    v_outputs = func(v_inputs)
                 except Exception as e:
                     print(e)
                     continue
@@ -295,7 +295,7 @@ class Net():
             if func:
                 self.inputs  = [self.random() for x in range(len(self._inputs))]
                 try:
-                    should = [self.extreme(num) for num in self.make_iter(func(*self.inputs))]
+                    should = [self.extreme(num) for num in self.make_iter(func(self.inputs))]
                 except:
                     continue
                 actual = self.outputs

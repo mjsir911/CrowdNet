@@ -89,7 +89,7 @@ class RIP(http2p.Server):
                 v_inputs  = [self.obj.random() for x in range(argcount)]
                 #print('epoch is :', age, end="\r", flush=True)
                 try:
-                    v_outputs = func(*v_inputs)
+                    v_outputs = func(v_inputs)
                 except Exception as e:
                     print(e)
                     continue
