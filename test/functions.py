@@ -5,6 +5,7 @@ import sys
 sys.path.insert(0, '../src')
 import net
 import cortex
+from test import mad
 
 __appname__     = ""
 __author__      = "Marco Sirabella"
@@ -19,18 +20,10 @@ __module__      = ""
 
 base = 4
 
-def mad(func):
-    def wrapper(*args, **kwargs):
-        first = int(''.join(str(round(n)) for n in args[:base]), 2)
-        last = int(''.join(str(round(n)) for n in args[base:]), 2)
-        input_bin = [int(z) for z in list(format(func(first, last), '0{}b'.format(base)))]
-        return input_bin
-    return wrapper
-
-add = mad(lambda a, b: a + b)
-sub = mad(lambda f, l: f - l)
-mul = mad(lambda a, b: a * b)
-div = mad(lambda d, n: d // n)
+add = mad(base)(lambda a, b: a + b)
+sub = mad(base)(lambda f, l: f - l)
+mul = mad(base)(lambda a, b: a * b)
+div = mad(base)(lambda d, n: d // n)
 
 simple = 0
 inverse = 1
