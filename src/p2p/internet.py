@@ -24,9 +24,8 @@ __status__      = "Prototype"  # "Prototype", "Development" or "Production"
 __module__      = ""
 
 class RIP(http2p.Server):
-    def __init__(self, *args, verbose=True, **kwargs):
+    def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.verbose = verbose
         self.total_age = 0
         self.udp_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         print('trying to bind to address ', self.local_address)
@@ -69,9 +68,12 @@ class RIP(http2p.Server):
         self.process(dataset)
 
     @test.timeme
-    def function_train(self, func, epoch):
+    def function_train(self, epoch, func=None):
         avg = 0
-        self.obj.func = func
+        if func:
+            self.obj.func = func
+        else:
+            func = self.obj.func
         #argcount = func.__code__.co_argcount
         argcount = len(self.obj.inputs) # bad practs
         #assert argcount == len(self.inputs), 'need different amount of inputs'
@@ -205,3 +207,37 @@ class RIP(http2p.Server):
         @classmethod
         def add_udp_response(cls, path, func):
             cls.responses.append((path, func))
+
+if __name__ == '__main__':
+    import argparse
+    parser = argparse.ArgumentParser(description='Setup a neural network over a computer network')
+
+    parser.add_argument('--addr', '-a', metavar='IP', type=str,
+            default=socket.gethostbyname(socket.gethostname()),
+            help='an integer for the accumulator')
+    parser.add_argument('--port', '-p', metavar='PORT', type=int,
+            default=random.randint(49152, 65535),
+            help='an integer for the accumulator')
+    parser.add_argument('--local', '-l', action='store_true',
+            help='an integer for the accumulator')
+    parser.add_argument('--net', '-n', metavar='NET', type=cortex.melt,
+            help='an integer for the accumulator')
+    parser.add_argument('-r', '--run', metavar='EPOCHS', type=float,
+            nargs='?', const=1e4, default=False,
+            help='an integer for the accumulator')
+    parser.add_argument('-v', '--verbose', action='store_true',
+            help='an integer for the accumulator')
+    args = parser.parse_args()
+    print(args)
+    intnet = RIP(address=(args.addr, args.port), local=args.local, verbose=args.verbose)
+    if args.net:
+        intnet.obj = args.net
+    if args.run:
+        if intnet.obj:
+            intnet.function_train(args.run)
+        else:
+            print('cannot run without neural network')
+            exit()
+    while True:
+        pass
+    #print(args.accumulate(args.integers))
