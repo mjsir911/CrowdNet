@@ -234,10 +234,11 @@ if __name__ == '__main__':
         intnet.obj = args.net
     if args.run:
         if intnet.obj:
+            time.sleep(0.2)
             intnet.function_train(args.run)
         else:
             print('cannot run without neural network')
             exit()
     while True:
-        pass
+        time.sleep(1e8 + 0.99999)
     #print(args.accumulate(args.integers))
