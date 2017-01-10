@@ -81,3 +81,14 @@ def truey(l):
     return new
 #raise Exception('no true values in {}'.format(l))
     print('no true values in {}'.format(l))
+
+
+def mad(base=4):
+    def decorator(func):
+        def wrapper(*args):
+            first = int(''.join(str(round(n)) for n in args[:base]), 2)
+            last = int(''.join(str(round(n)) for n in args[base:]), 2)
+            input_bin = [int(z) for z in list(format(func(first, last), '0{}b'.format(base)))]
+            return input_bin
+        return wrapper
+    return decorator
