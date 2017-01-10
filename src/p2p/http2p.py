@@ -24,8 +24,9 @@ __module__      = ""
 
 class Server():
 
-    def __init__(self, obj=None, address=(socket.gethostbyname(socket.gethostname()), 37598), phonebook={('192.168.1.42', 8000)}, local=True):
+    def __init__(self, obj=None, address=(socket.gethostbyname(socket.gethostname()), 37598), phonebook={('192.168.1.42', 8000)}, local=True, verbose=False):
     #def __init__(self, port):
+        self.verbose = verbose
         # Server settings
         self.phonebook = {(socket.gethostbyname(addr), port) for addr, port in phonebook} # who woulda thought
         if local:
@@ -76,7 +77,7 @@ class Server():
     @obj.setter
     def obj(self, obj):
         if obj != self._obj:
-            print('recursive?')
+            #print('recursive?')
             self._obj = obj
             self.mass_post('dill/set', obj)
         else:
@@ -129,7 +130,8 @@ class Server():
         conn = http.client.HTTPConnection(*address)
         conn.connect()
         conn.request("GET", "/{}".format(path))
-        print('getting response from {} at path {}'.format(address, path))
+        #if self.verbose:
+            #print('getting response from {} at path {}'.format(address, path))
         response = conn.getresponse()
         data = response.read()
         try:
@@ -144,7 +146,8 @@ class Server():
         conn.connect()
         #print('posting to ', address)
         conn.request("POST", "/{}".format(path), cortex.introspect(data))
-        print('posting response from {} at path {}'.format(address, path))
+        #if self.verbose:
+            #print('posting response to {} at path {}'.format(address, path))
         response = conn.getresponse()
         data = response.read()
         #return cortex.introspect(data)
