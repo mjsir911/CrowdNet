@@ -106,8 +106,10 @@ class RIP(http2p.Server):
                 retry = False
                 while old_axons == self.obj.axons:
                     if self.verbose:
-                        print('waiting for other data')
+                        #print('waiting for other data')
+                        pass
                     wait += 1
+                    #if wait > len(self.phonebook) * 7000:
                     if wait > len(self.phonebook) * 7000:
                         retry = True
                         break
@@ -220,7 +222,7 @@ if __name__ == '__main__':
             help='an integer for the accumulator')
     parser.add_argument('--local', '-l', action='store_true',
             help='an integer for the accumulator')
-    parser.add_argument('--net', '-n', metavar='NET', type=cortex.melt,
+    parser.add_argument('--net', '-n', metavar='NET',
             help='an integer for the accumulator')
     parser.add_argument('-r', '--run', metavar='EPOCHS', type=float,
             nargs='?', const=1e4, default=False,
@@ -231,11 +233,13 @@ if __name__ == '__main__':
     print(args)
     intnet = RIP(address=(args.addr, args.port), local=args.local, verbose=args.verbose)
     if args.net:
-        intnet.obj = args.net
+        intnet.obj = cortex.melt(args.net)
     if args.run:
         if intnet.obj:
             time.sleep(0.2)
             intnet.function_train(args.run)
+            cortex.freeze(intnet.obj, args.net)
+
         else:
             print('cannot run without neural network')
             exit()
