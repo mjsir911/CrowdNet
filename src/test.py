@@ -56,7 +56,9 @@ def threaded(func):
     from functools import wraps
     @wraps(func)
     def wrapper(*args, **kwargs):
-        return Thread(target = func, args = args, kwargs = kwargs).start()
+        th = Thread(target=func, args=args, kwargs = kwargs)
+        th.daemon = True
+        return th.start()
     return wrapper
 
 @multipro
