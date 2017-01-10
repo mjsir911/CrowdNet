@@ -24,7 +24,7 @@ __module__      = ""
 
 class Server():
 
-    def __init__(self, obj=None, address=(socket.gethostbyname(socket.gethostname()), 37598), phonebook={('192.168.1.42', 8000)}, local=True, verbose=False):
+    def __init__(self, obj=None, address=(socket.gethostbyname(socket.gethostname()), 37598), phonebook={('192.168.1.7', 6702)}, local=True, verbose=False):
     #def __init__(self, port):
         self.verbose = verbose
         # Server settings
