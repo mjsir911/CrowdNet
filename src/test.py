@@ -34,9 +34,18 @@ def timemeavg(method):
 
         time_took = endTime - startTime
         #print(endTime - startTime, 'ms')
-        return result, time_took
+        if result:
+            return result, time_took
+        else:
+            return time_took
 
     return wrapper
+
+@timemeavg
+def benchmark():
+    x = 0
+    while x < 1e6:
+        x += 1
 
 def multipro(function):
     def wrapper(*args, **kwargs):
