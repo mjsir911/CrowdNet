@@ -109,15 +109,17 @@ class RIP(http2p.Server):
                         #print('waiting for other data')
                         pass
                     wait += 1
+                    #if wait > len(self.phonebook) * 70000:
+                    if False:
                     #if wait > len(self.phonebook) * 7000:
-                    if wait > len(self.phonebook) * 7000:
                         retry = True
                         break
                 if wait > max_wait:
                     max_wait = wait
                 if retry:
                     self.equalize()
-                    print('timed out, equalized and retrying')
+                    if self.verbose:
+                        print('timed out, equalized and retrying')
                     continue
                 self.total_age += 1
                 age += 1
@@ -236,7 +238,8 @@ if __name__ == '__main__':
         intnet.obj = cortex.melt(args.net)
     if args.run:
         if intnet.obj:
-            time.sleep(0.2)
+            #time.sleep(0.2)
+            print('runnin')
             intnet.function_train(args.run)
             cortex.freeze(intnet.obj, args.net)
 
