@@ -6,9 +6,9 @@ right now all you need to do to test how it works is:
 # Crowd-Net
 
 The wonderfully generic (hopefully)crowd-sourced neural network
-(the crowd sourced-ness is basically a pipe dream right now)
+(The crowd-sourced net has arisen in the form of p2p and is currently working on my lab!)
 This is mostly a learning experience for me, many many more efficient alternatives exist out [there](https://github.com/tensorflow/tensorflow)
-Tensorflow actually provides really nice neural network stuff [here](http://playground.tensorflow.org)
+Tensorflow actually provides a really nice neural network representation [here](http://playground.tensorflow.org)
 
 
 ## Getting Started
@@ -23,11 +23,13 @@ If you want to experiment around, simply open up a python interpretive shell ins
     # or
     network.function_train(func, iterations)
 
-The network is dumb as rocks but it can work logic gates pretty well!
+The network is dumb as rocks but it can work logic gates(100%) & 4 bit division(93%) pretty well!
 
 ### Prerequisities
 
 _**[Python3](https://www.python.org/download/releases/3.0/)**_
+
+virtualenv
 
     pip3 install virtualenv
 
@@ -41,11 +43,11 @@ To get a working development environment setup, simply git clone this repository
 
 next navigate to specified directory
 
-    cd crowdnet
+    cd CrowdNet
 
 You should see the contents of the repository's filesystem
 
-Then run virtualenv
+Then run virtualenv to initialize a virtual environment in the folder ``venv``
 
     virtualenv venv
 
@@ -66,16 +68,21 @@ To get out of a virtualenv:
 
 To run the automated test, navigate to the test directory: ``cd test`` and run the functions.py file
 
-    python3 functions.py
+    python3 shallow.py
 
 or
 
-    ./functions.py
+    ./shallow.py
 
 ## Deployment
 
 Learning takes a bit of time(obviously)
 Bigger neural networks take insane amounts of ram
+
+### P2P module
+Due to physical limitations of a single computer, I have developed a peer to peer cluster network that allows the neural network to distribute the processing power equally amongst all peers.
+
+To initialize this, see documentation on the internet.py module.
 
 ## Built With
 
