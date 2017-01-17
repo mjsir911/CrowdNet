@@ -25,6 +25,7 @@ __module__      = ""
 class Server():
 
     def __init__(self, obj=None, address=(socket.gethostbyname(socket.gethostname()), 37598), phonebook={('192.168.102.33', 6702)}, local=True, verbose=False):
+    #def __init__(self, obj=None, address=(socket.gethostbyname(socket.gethostname()), 37598), phonebook=set(), local=True, verbose=False):
     #def __init__(self, port):
         self.verbose = verbose
         # Server settings
@@ -122,7 +123,8 @@ class Server():
                     self.phonebook.add(phone)
 
         #print(oldphonebook, list(self.phonebook))
-        print('difference: ', set(oldphonebook) - self.phonebook)
+        if self.verbose:
+            print('difference: ', set(oldphonebook) - self.phonebook)
         return change
 
     @classmethod
