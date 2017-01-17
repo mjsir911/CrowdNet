@@ -1,6 +1,12 @@
 #!/usr/bin/env python3
+
+"""
+A neural network with distributed processing power over a network of computers.
+
+
+test1
+"""
 # -*- coding: utf-8 -*-
-#lol
 
 import socketserver
 import socket
@@ -23,10 +29,12 @@ __email__       = "msirabel@gmail.com"
 __status__      = "Prototype"  # "Prototype", "Development" or "Production"
 __module__      = ""
 
-class RIP(http2p.Server):
+
+
+class INNet(http2p.Server):
+    """Inter-Connected Neural Network- Peer for the network cluster"""
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.total_age = 0
         self.udp_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         print('trying to bind to address ', self.local_address)
         self.UDPHandler.verbose = self.verbose
@@ -68,7 +76,7 @@ class RIP(http2p.Server):
         self.process(dataset)
 
     @test.timeme
-    def function_train(self, epoch, func=None):
+    def function_train(self, epoch, func=None, override=False):
         avg = 0
         if func:
             self.obj.func = func
@@ -81,9 +89,10 @@ class RIP(http2p.Server):
             age = 0
             max_wait = 0
             while age < epoch:
-                if self.obj.error(0.1) > 0.95:
-                    print('accuracy above 0.95 in {} epochs, breaking'.format(self.total_age))
-                    break
+                if not override:
+                    if self.obj.error(0.1) > 0.95:
+                        print('accuracy above 0.95 in {} epochs, breaking'.format(self.obj.total_age))
+                        break
                 startTime = time.time() * 1000
                 old_axons = self.obj.axons
                 v_inputs  = [self.obj.random() for x in range(argcount)]
@@ -121,7 +130,7 @@ class RIP(http2p.Server):
                     if self.verbose:
                         print('timed out, equalized and retrying')
                     continue
-                self.total_age += 1
+                self.obj.total_age += 1
                 age += 1
                 endTime = time.time() * 1000
                 avg = (avg * age + (endTime - startTime)) / (age + 1)
@@ -233,7 +242,7 @@ if __name__ == '__main__':
             help='an integer for the accumulator')
     args = parser.parse_args()
     print(args)
-    intnet = RIP(address=(args.addr, args.port), local=args.local, verbose=args.verbose)
+    intnet = INNet(address=(args.addr, args.port), local=args.local, verbose=args.verbose)
     if args.net:
         intnet.obj = cortex.melt(args.net)
     if args.run:

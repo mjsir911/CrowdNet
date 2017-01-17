@@ -146,6 +146,7 @@ class Net():
         self.func = func
         self.is_discrete=is_discrete
         self.eta = eta
+        self.total_age = 0
         self._inputs = [Input() for x in range(input_neurons)]
         chain.append(self._inputs)
 
@@ -249,7 +250,7 @@ class Net():
             print('wow rude')
 
     @test.timeme
-    def function_train(self, epoch, func=None):
+    def function_train(self, epoch, func=None, override=False):
         if func:
             if self.func:
                 self.func = func
@@ -265,6 +266,13 @@ class Net():
         #assert argcount == len(self.inputs), 'need different amount of inputs'
         try:
             for age in range(int(epoch)):
+                """
+                while age < epoch:
+                    if not override:
+                        if self.error(0.1) > 0.95:
+                            print('accuracy above 0.95 in {} epochs, breaking'.format(self.total_age))
+                            break
+                """
                 v_inputs  = [self.random() for x in range(argcount)]
                 print('epoch is :', age, end="\r", flush=True)
                 try:
@@ -275,6 +283,7 @@ class Net():
                 v_outputs = self.make_iter(v_outputs)
                 #print('input = {}, output = {}'.format(v_inputs, v_outputs))
                 many = 1
+                self.total_age += 1
                 for offset in range(0, many):
                     self.axons = self.train([v_inputs, v_outputs], (offset, many))
             print('training complete')
