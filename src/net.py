@@ -42,7 +42,6 @@ class Neuron():
         self.operation = operation
         self.axons = []
         self.target = None
-        self.bias = 0
 
     @property
     def value(self):
@@ -69,20 +68,12 @@ class Neuron():
             #net += axon.dendrite.net_derivative * axon.weight
             net += axon.dendrite.inverse * axon.weight
         if not self.axons:
-        #if not net: # does same thing
-            #net = -(self.target - self.value) * self.value * (1 - self.value)
-            #net = -(self.target - self.value) * self.value * (1 - self.value)
-
-            #print('net : ', net)
-            # gotta make this happen
             net = -(self.target - self.value)
         return net
 
     @property
     def inverse(self):
         return self.net_derivative * self.value * (1 - self.value)
-        # doesnt work
-        #pass
 
 
     def Axon(self, *args):
@@ -94,9 +85,7 @@ class _Axon():
     def __init__(self, parent, weight=0):
         if weight:
             self.weight = weight
-            #print('setting weight to {}'.format(weight))
         else:
-            #print('setting random weight')
             self.weight = 2 * random.random() - 1
         self.parent = parent
         self.new_weight = 2 * random.random() - 1
