@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+import random
+
 __appname__     = ""
 __author__      = "Marco Sirabella"
 __copyright__   = ""
@@ -53,7 +55,7 @@ class Axon():
         if weight:
             self.weight = weight
         else:
-            self.weight = 0.5
+            self.weight = random.random()
 
     @property
     def value(self):
@@ -113,7 +115,7 @@ class Static(Neuron):
 class Input(Neuron):
     def __init__(self):
         super().__init__()
-        self._value = 0.5
+        self._value = 0
 
     @property
     def out(self):
@@ -168,6 +170,16 @@ class NNet():
             axon.backprop(self.eta)
         for axon in self.axons:
             axon.lock()
+
+    def train(self, dataset, epoch):
+        age = 0
+        while age < epoch:
+            datum = dataset[random.randint(0, len(dataset) - 1)]
+            self.inputs  = datum[0]
+            self.outputs = datum[1]
+            self.back_pass()
+            age += 1
+            print('epoch is {}'.format(age), end='\r')
 
 class DFFNet(NNet):
     """
