@@ -166,10 +166,14 @@ class NNet():
             output.target = value
 
     def back_pass(self):
-        for axon in self.axons:
-            axon.backprop(self.eta)
-        for axon in self.axons:
-            axon.lock()
+        try:
+            for axon in self.axons:
+                axon.backprop(self.eta)
+        except:
+            pass
+        finally:
+            for axon in self.axons:
+                axon.lock()
 
     def train(self, dataset, epoch):
         age = 0
