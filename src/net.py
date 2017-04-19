@@ -51,14 +51,10 @@ op = sum
 
 import math
 class Neuron():
-    def __init__(self, value=None):
+    def __init__(self):
         self._iAxon = []
         self._oAxon = []
         self._done = False
-        if value:
-            self._value = value
-        else:
-            self._value = None
 
     @property
     def net(self):
@@ -66,23 +62,34 @@ class Neuron():
 
     @property
     def out(self):
-        if self._value:
-            return self._value
-        else:
-            return 1 / (1 + math.exp(-self.net))
+        return 1 / (1 + math.exp(-self.net))
 
+class Static(Neuron):
+    def __init__(self, value):
+        super().__init__()
+        self._value = value
+
+    @property
+    def out(self):
+        return self._value
 
 class Input(Neuron):
-    def __init__(self, value=None):
-        super().__init__(value)
+    def __init__(self):
+        super().__init__()
+        self._value = 0.5
+
+    @property
+    def out(self):
+        return self._value
+
+    @out.setter
+    def input(self, value):
+        self._value = value
 
 class Output(Neuron):
-    def __init__(self, target=None):
+    def __init__(self):
         super().__init__()
-        if target:
-            self._target = target
-        else:
-            self._target = 0
+        self._target = 0
 
     @property
     def target(self):
@@ -121,9 +128,13 @@ class DFFNet():
 
 class ITest():
     def __init__(self):
-        self._inputs = (Input(0.05), Input(0.10), Neuron(1))
-        self._hiddens = (Neuron(), Neuron(), Neuron(1))
-        self._outputs = (Output(0.01), Output(0.99))
+        self._inputs = (Input(), Input(), Static(1))
+        self._inputs[0].value = 0.05
+        self._inputs[1].value = 0.10
+        self._hiddens = (Neuron(), Neuron(), Static(1))
+        self._outputs = (Output(), Output())
+        self._outputs[0].target = 0.01
+        self._outputs[1].target = 0.99
         self.axons = []
         i1, i2 = self._inputs[:2]
         h1, h2 = self._hiddens[:2]
