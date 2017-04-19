@@ -143,7 +143,13 @@ class Output(Neuron):
         self._done = True
         return -(self.target - self.out)
 
+    @property
+    def error(self):
+        return (self.target - self.out) ** 2 / 2
+
+
 import itertools
+import numpy
 class NNet():
     def __init__(self, eta=0):
         self.eta = eta
@@ -169,25 +175,44 @@ class NNet():
         try:
             for axon in self.axons:
                 axon.backprop(self.eta)
-        except:
-            pass
         finally:
             for axon in self.axons:
                 axon.lock()
 
-    def train(self, dataset, epoch):
+    def train(self, epoch, dataset=None, verbose=True):
+        if not dataset:
+            dataset = self.dataset
         age = 0
-        while age < epoch:
+        try:
+            while age < epoch:
+                datum = dataset[random.randint(0, len(dataset) - 1)]
+                self.inputs  = datum[0]
+                self.outputs = datum[1]
+                self.back_pass()
+                age += 1
+                if verbose:
+                    print('epoch is {}'.format(age), end='\r')
+        except KeyboardInterrupt:
+            self.back_pass()
+        finally:
+            if verbose:
+                print()
+
+    def error(self, accuracy, dataset=None):
+        if not dataset:
+            dataset = self.dataset
+        error = 0
+        for _ in range(accuracy):
+            #self.train(1, dataset, False)
             datum = dataset[random.randint(0, len(dataset) - 1)]
             self.inputs  = datum[0]
             self.outputs = datum[1]
-            self.back_pass()
-            age += 1
-            print('epoch is {}'.format(age), end='\r')
+            error += sum(output.error for output in self._outputs)
+        return error / accuracy
 
 class DFFNet(NNet):
     """
-    Deep feed forward neural network
+    Deep fried forward neural network
       >>> z = DFFNet(2, [2], 1)
     """
     def __init__(self, input_neurons, hidden_neurons, output_neurons, eta=1):
