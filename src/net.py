@@ -36,15 +36,6 @@ def pLock(func):
             return r
     return wrapper
 
-"""
-def pLock(func):
-    @property
-    @functools.wraps(func)
-    def wrapper(self):
-        return func(self)
-    return wrapper
-    """
-
 class Axon():
     def __init__(self,  iNeuron, oNeuron, weight=None):
         iNeuron._oAxon.append(self)
@@ -95,7 +86,20 @@ class Neuron():
 
     @pLock
     def net_derivative(self):
-        return sum(axon.error for axon in self._oAxon) * self.out * (1 - self.out)
+        return sum(axon.error for axon in self._oAxon) * self.out * (1 -
+                self.out)
+
+    def f_connect(self, other, weight=None):
+        return Axon(self, other, weight)
+
+    def back_pass(self, eta=0.5):
+        for a in self._oAxon:
+            a.backprop(eta)
+
+    def lock(self):
+        for a in self._oAxon:
+            a.lock()
+
 
 class Static(Neuron):
     def __init__(self, value):
@@ -141,7 +145,6 @@ class Output(Neuron):
     def error(self):
         return (self.target - self.out) ** 2 / 2
 
-
 import itertools
 import numpy
 class NNet():
@@ -165,13 +168,18 @@ class NNet():
         for output, value in zip(self._outputs, values):
             output.target = value
 
+    @property
+    def neurons(self):
+        return tuple(list(self._inputs) + sum((list(t) for t in self._hiddens),
+            []) + list(self._outputs))
+
     def back_pass(self):
         try:
-            for axon in self.axons:
-                axon.backprop(self.eta)
+            for neuron in self.neurons:
+                neuron.back_pass(self.eta)
         finally:
-            for axon in self.axons:
-                axon.lock()
+            for neuron in self.neurons:
+                neuron.lock()
 
     def train(self, epoch, dataset=None, verbose=True):
         if not dataset:
@@ -215,53 +223,80 @@ class DFFNet(NNet):
         self._inputs  = tuple(      Input()  for _ in range(input_neurons))
         self._hiddens = tuple(tuple(Neuron() for _ in range(i)) for i in hidden_neurons)
         self._outputs = tuple(      Output() for _ in range(output_neurons))
-        self.neurons  = (self._inputs,) + self._hiddens + (self._outputs,)
-        for one, next in zip(self.neurons, self.neurons[1:]):
+        self._neurons  = (self._inputs,) + self._hiddens + (self._outputs,)
+        for one, next in zip(self._neurons, self._neurons[1:]):
             for iNeuron, oNeuron in itertools.product(one, next):
                 self.axons.append(Axon(iNeuron, oNeuron))
 
-class ITest(NNet):
-    def __init__(self):
-        super().__init__(0.5)
+    @staticmethod
+    def x_layers(outlayer, inlayer):
+        for oNeuron in inlayer:
+            for iNeuron in outlayer:
+                oNeuron.f_connect(iNeuron)
 
-        self._inputs = (Input(), Input(), Static(1))
+
+
+class ITest(DFFNet):
+    """
+      >>> z = ITest()
+      >>> print(z.inputs)
+      [0.05, 0.1]
+      >>> print([o.target for o in z._outputs])
+      [0.01, 0.99]
+      >>> print([a.weight for a in z.axons])
+      [0.15, 0.2, 0.25, 0.3, 0.4, 0.45, 0.5, 0.55]
+      >>> z.back_pass()
+      >>> print([a.weight for a in z.axons])
+      [0.1497807161327628, 0.19956143226552567, 0.24975114363236958, 0.29950228726473915, 0.35891647971788465, 0.4086661860762334, 0.5113012702387375, 0.5613701211079891]
+
+
+
+
+    """
+    def __init__(self):
+        super().__init__(2, [2], 2, 0.5)
+
         self._inputs[0].input = 0.05
         self._inputs[1].input = 0.10
 
-        self._hiddens = ((Neuron(), Neuron(), Static(1)),)
+        self._hiddens = ((Neuron(), Neuron()),)
 
         self._outputs = (Output(), Output())
         self._outputs[0].target = 0.01
         self._outputs[1].target = 0.99
 
-        self.neurons  = (self._inputs,) + self._hiddens + (self._outputs,)
+        self._neurons  = (self._inputs,) + self._hiddens + (self._outputs,)
 
-        i1, i2 = self._inputs[:2]
-        h1, h2 = self._hiddens[0][:2]
+        b1 = Static(1)
+        i1, i2 = self._inputs
+        h1, h2 = self._hiddens[0]
         o1, o2 = self._outputs
-        s1, s2 = self._inputs[2], self._hiddens[0][2]
 
 
+        self.axons = []
+        self.axons.append(i1.f_connect(h1))
+        self.axons[0].weight = 0.15
+        self.axons.append(i2.f_connect(h1))
+        self.axons[1].weight = 0.20
+        self.axons.append(i1.f_connect(h2))
+        self.axons[2].weight = 0.25
+        self.axons.append(i2.f_connect(h2))
+        self.axons[3].weight = 0.30
 
-        self.axons.append(Axon(i1, h1, 0.15))
-        self.axons.append(Axon(i2, h1, 0.20))
-        self.axons.append(Axon(i1, h2, 0.25))
-        self.axons.append(Axon(i2, h2, 0.30))
+        b1.f_connect(h1, 0.35)
+        b1.f_connect(h2, 0.35)
 
-        Axon(s1, h1, 0.35)
-        Axon(s1, h2, 0.35)
+        self.axons.append(h1.f_connect(o1, 0.40))
+        self.axons.append(h2.f_connect(o1, 0.45))
+        self.axons.append(h1.f_connect(o2, 0.50))
+        self.axons.append(h2.f_connect(o2, 0.55))
 
-        self.axons.append(Axon(h1, o1, 0.40))
-        self.axons.append(Axon(h2, o1, 0.45))
-        self.axons.append(Axon(h1, o2, 0.50))
-        self.axons.append(Axon(h2, o2, 0.55))
-
-        Axon(s2, o1, 0.60)
-        Axon(s2, o2, 0.60)
+        b1.f_connect(o1, 0.60)
+        b1.f_connect(o2, 0.60)
 
 
 
 if __name__ == '__main__':
     import doctest
     z = ITest()
-    #doctest.testmod()
+    doctest.testmod()
