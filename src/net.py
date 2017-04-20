@@ -59,7 +59,6 @@ class Axon():
     def backprop(self, eta):
         delta_error = self.oNeuron.net_derivative * self.iNeuron.out
         self.new_weight = self.weight - eta * delta_error
-        #print(self.new_weight)
 
     def lock(self):
         self.weight = self.new_weight
@@ -143,7 +142,7 @@ class Output(Neuron):
 
     @property
     def error(self):
-        return (self.target - self.out) ** 2 / 2
+        return (self.target - self.out) ** 2
 
 import itertools
 import numpy
@@ -174,11 +173,18 @@ class NNet():
 
     def back_pass(self):
         try:
+            for axon in self.axons:
+                axon.backprop(self.eta)
+        finally:
+            for axon in self.axons:
+                axon.lock()
+            """
             for neuron in self.neurons:
                 neuron.back_pass(self.eta)
         finally:
             for neuron in self.neurons:
                 neuron.lock()
+                """
 
     def train(self, epoch, dataset=None, verbose=True):
         if not dataset:
@@ -186,7 +192,8 @@ class NNet():
         age = 0
         try:
             while age < epoch:
-                datum = dataset[random.randint(0, len(dataset) - 1)]
+                datum = tuple(dataset.items())[
+                        random.randint(0, len(dataset) - 1)]
                 self.inputs  = datum[0]
                 self.outputs = datum[1]
                 self.back_pass()
@@ -205,7 +212,8 @@ class NNet():
         error = 0
         for _ in range(accuracy):
             #self.train(1, dataset, False)
-            datum = dataset[random.randint(0, len(dataset) - 1)]
+            datum = tuple(dataset.items())[
+                    random.randint(0, len(dataset) - 1)]
             self.inputs  = datum[0]
             self.outputs = datum[1]
             error += sum(output.error for output in self._outputs)
