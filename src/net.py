@@ -54,10 +54,10 @@ class Axon():
 
     @property
     def error(self):
-        return self.oNeuron.net_derivative * self.weight
+        return self.oNeuron.derivative * self.weight
 
     def backprop(self, eta):
-        delta_error = self.oNeuron.net_derivative * self.iNeuron.out
+        delta_error = self.oNeuron.derivative * self.iNeuron.out
         self.new_weight = self.weight - eta * delta_error
 
     def lock(self):
@@ -87,6 +87,14 @@ class Neuron():
     def net_derivative(self):
         return sum(axon.error for axon in self._oAxon) * self.out * (1 -
                 self.out)
+
+    @pLock
+    def partial_derivative(self):
+        return self.out * (1 - self.out)
+
+    @pLock
+    def derivative(self):
+        return self.partial_derivative * self.net_derivative
 
     def f_connect(self, other, weight=None):
         return Axon(self, other, weight)
@@ -138,7 +146,8 @@ class Output(Neuron):
     @pLock
     def net_derivative(self):
         self._done = True
-        return -(self.target - self.out) * self.out * (1 - self.out)
+        return -(self.target - self.out)
+
 
     @property
     def error(self):
