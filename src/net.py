@@ -36,15 +36,6 @@ def pLock(func):
             return r
     return wrapper
 
-"""
-def pLock(func):
-    @property
-    @functools.wraps(func)
-    def wrapper(self):
-        return func(self)
-    return wrapper
-    """
-
 class Axon():
     def __init__(self,  iNeuron, oNeuron, weight=None):
         iNeuron._oAxon.append(self)
@@ -63,12 +54,10 @@ class Axon():
 
     @property
     def error(self):
-        return self.oNeuron.partial_derivative * self.oNeuron.net_derivative \
-                * self.weight
+        return self.oNeuron.net_derivative * self.weight
 
     def backprop(self, eta):
-        delta_error = self.oNeuron.partial_derivative * \
-        self.oNeuron.net_derivative * self.iNeuron.out
+        delta_error =  self.oNeuron.net_derivative * self.iNeuron.out
         self.new_weight = self.weight - eta * delta_error
         #print(self.new_weight)
 
@@ -97,11 +86,8 @@ class Neuron():
 
     @pLock
     def net_derivative(self):
-        return sum(axon.error for axon in self._oAxon)
-
-    @pLock
-    def partial_derivative(self):
-        return self.out * (1 - self.out)
+        return sum(axon.error for axon in self._oAxon) * self.out * (1 -
+                self.out)
 
 class Static(Neuron):
     def __init__(self, value):
@@ -227,14 +213,28 @@ class DFFNet(NNet):
                 self.axons.append(Axon(iNeuron, oNeuron))
 
 class ITest(NNet):
+    """
+      >>> z = ITest()
+      >>> print(z.inputs)
+      [0.05, 0.1]
+      >>> print([o.target for o in z._outputs])
+      [0.01, 0.99]
+      >>> print([a.weight for a in z.axons])
+      [0.15, 0.2, 0.25, 0.3, 0.4, 0.45, 0.5, 0.55]
+      >>> z.back_pass()
+      >>> print([a.weight for a in z.axons])
+
+
+
+    """
     def __init__(self):
         super().__init__(0.5)
 
-        self._inputs = (Input(), Input(), Static(1))
+        self._inputs = (Input(), Input())
         self._inputs[0].input = 0.05
         self._inputs[1].input = 0.10
 
-        self._hiddens = ((Neuron(), Neuron(), Static(1)),)
+        self._hiddens = ((Neuron(), Neuron()),)
 
         self._outputs = (Output(), Output())
         self._outputs[0].target = 0.01
@@ -242,10 +242,10 @@ class ITest(NNet):
 
         self.neurons  = (self._inputs,) + self._hiddens + (self._outputs,)
 
+        b1 = Static(1)
         i1, i2 = self._inputs[:2]
-        h1, h2 = self._hiddens[0][:2]
+        h1, h2 = self._hiddens[0]
         o1, o2 = self._outputs
-        s1, s2 = self._inputs[2], self._hiddens[0][2]
 
 
 
@@ -254,20 +254,20 @@ class ITest(NNet):
         self.axons.append(Axon(i1, h2, 0.25))
         self.axons.append(Axon(i2, h2, 0.30))
 
-        Axon(s1, h1, 0.35)
-        Axon(s1, h2, 0.35)
+        Axon(b1, h1, 0.35)
+        Axon(b1, h2, 0.35)
 
         self.axons.append(Axon(h1, o1, 0.40))
         self.axons.append(Axon(h2, o1, 0.45))
         self.axons.append(Axon(h1, o2, 0.50))
         self.axons.append(Axon(h2, o2, 0.55))
 
-        Axon(s2, o1, 0.60)
-        Axon(s2, o2, 0.60)
+        Axon(b1, o1, 0.60)
+        Axon(b1, o2, 0.60)
 
 
 
 if __name__ == '__main__':
     import doctest
     z = ITest()
-    #doctest.testmod()
+    doctest.testmod()
