@@ -65,19 +65,17 @@ class Axon():
         self.oNeuron._done = False
         self.iNeuron._done = False
 
-
-op = sum
-
 import math
 class Neuron():
-    def __init__(self):
+    def __init__(self, operator=sum):
+        self.op = operator
         self._iAxon = []
         self._oAxon = []
         self._done = False
 
     @pLock
     def net(self):
-        return op(i.value for i in self._iAxon)
+        return self.op(i.value for i in self._iAxon)
 
     @pLock
     def out(self):
