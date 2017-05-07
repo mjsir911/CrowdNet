@@ -89,8 +89,7 @@ class Neuron():
 
     @pLock
     def net_derivative(self):
-        return sum(axon.error for axon in self._oAxon) * self.out * (1 -
-                self.out)
+        return sum(axon.error for axon in self._oAxon)
 
     @pLock
     def partial_derivative(self):
@@ -271,19 +270,10 @@ class ITest(DFFNet):
       [0.274811083, 0.023560026]
       >>> round(z.error(1), 9)
       0.298371109
-      >>> eta=z.eta
-      >>> round(z.axons[5-1].backprop(eta), 9)
-      0.35891648
-      >>> round(z.axons[6-1].backprop(eta), 9)
-      0.408666186
-      >>> round(z.axons[7-1].backprop(eta), 9)
-      0.51130127
-      >>> round(z.axons[8-1].backprop(eta), 9)
-      0.561370121
-      >>> round(z.axons[1-1].backprop(eta), 9)
-      0.149780716
-      >>> round(z.axons[2-1].backprop(eta), 9)
-      0.19956143
+      >>> z.train(1)
+      epoch is 1\r
+      >>> [round(a.weight, 9) for a in z.axons]
+      [0.149780716, 0.199561432, 0.249751144, 0.299502287, 0.35891648, 0.408666186, 0.51130127, 0.561370121]
 
 
 
@@ -297,7 +287,6 @@ class ITest(DFFNet):
 
     def weave(self):
 
-        b1 = Static(1)
         i1, i2 = self._inputs
         h1, h2 = self._hiddens[0]
         o1, o2 = self._outputs
@@ -307,6 +296,7 @@ class ITest(DFFNet):
         self.axons.append(i1.f_connect(h2, 0.25))
         self.axons.append(i2.f_connect(h2, 0.30))
 
+        b1 = Static(1)
         b1.f_connect(h1, 0.35)
         b1.f_connect(h2, 0.35)
 
@@ -315,8 +305,9 @@ class ITest(DFFNet):
         self.axons.append(h1.f_connect(o2, 0.50))
         self.axons.append(h2.f_connect(o2, 0.55))
 
-        b1.f_connect(o1, 0.60)
-        b1.f_connect(o2, 0.60)
+        b2 = Static(1)
+        b2.f_connect(o1, 0.60)
+        b2.f_connect(o2, 0.60)
 
 
 
