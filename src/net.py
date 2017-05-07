@@ -38,11 +38,9 @@ def pLock(func):
 
 class Axon():
     def __init__(self,  iNeuron, oNeuron, weight=None):
-        iNeuron._oAxon.append(self)
-        oNeuron._iAxon.append(self)
         self.iNeuron = iNeuron
         self.oNeuron = oNeuron
-        self.neurons = (iNeuron, oNeuron)
+        self.bind()
         if weight:
             self.weight = weight
         else:
@@ -59,11 +57,19 @@ class Axon():
     def backprop(self, eta):
         delta_error = self.oNeuron.derivative * self.iNeuron.out
         self.new_weight = self.weight - eta * delta_error
+        return self.new_weight
 
     def lock(self):
         self.weight = self.new_weight
         self.oNeuron._done = False
         self.iNeuron._done = False
+
+    def unbind(self):
+        self.iNeuron._oAxon.remove(self)
+        self.oNeuron._iAxon.remove(self)
+    def bind(self):
+        self.iNeuron._oAxon.append(self)
+        self.oNeuron._iAxon.append(self)
 
 import math
 class Neuron():
@@ -149,13 +155,14 @@ class Output(Neuron):
 
     @property
     def error(self):
-        return (self.target - self.out) ** 2
+        return 0.5 * (self.target - self.out) ** 2
 
 import itertools
 import numpy
 class NNet():
-    def __init__(self, eta=0):
+    def __init__(self, eta=0, dataset=None):
         self.eta = eta
+        self.dataset = dataset
         self.axons = []
 
     @property
@@ -185,13 +192,6 @@ class NNet():
         finally:
             for axon in self.axons:
                 axon.lock()
-            """
-            for neuron in self.neurons:
-                neuron.back_pass(self.eta)
-        finally:
-            for neuron in self.neurons:
-                neuron.lock()
-                """
 
     def train(self, epoch, dataset=None, verbose=True):
         if not dataset:
@@ -231,13 +231,17 @@ class DFFNet(NNet):
     Deep fried forward neural network
       >>> z = DFFNet(2, [2], 1)
     """
-    def __init__(self, input_neurons, hidden_neurons, output_neurons, eta=1):
-        super().__init__(eta)
+    def __init__(self, input_neurons, hidden_neurons, output_neurons, eta=1,
+            dataset=None):
+        super().__init__(eta, dataset=dataset)
 
         self._inputs  = tuple(      Input()  for _ in range(input_neurons))
         self._hiddens = tuple(tuple(Neuron() for _ in range(i)) for i in hidden_neurons)
         self._outputs = tuple(      Output() for _ in range(output_neurons))
         self._neurons  = (self._inputs,) + self._hiddens + (self._outputs,)
+        self.weave()
+
+    def weave(self):
         for one, next in zip(self._neurons, self._neurons[1:]):
             for iNeuron, oNeuron in itertools.product(one, next):
                 self.axons.append(Axon(iNeuron, oNeuron))
@@ -252,50 +256,56 @@ class DFFNet(NNet):
 
 class ITest(DFFNet):
     """
+    using this document
+    https://mattmazur.com/2015/03/17/a-step-by-step-backpropagation-example/
       >>> z = ITest()
       >>> print(z.inputs)
       [0.05, 0.1]
+      >>> [a.weight for a in z.axons]
+      [0.15, 0.2, 0.25, 0.3, 0.4, 0.45, 0.5, 0.55]
       >>> print([o.target for o in z._outputs])
       [0.01, 0.99]
-      >>> print([a.weight for a in z.axons])
-      [0.15, 0.2, 0.25, 0.3, 0.4, 0.45, 0.5, 0.55]
-      >>> z.back_pass()
-      >>> print([a.weight for a in z.axons])
-      [0.1497807161327628, 0.19956143226552567, 0.24975114363236958, 0.29950228726473915, 0.35891647971788465, 0.4086661860762334, 0.5113012702387375, 0.5613701211079891]
+      >>> [round(i, 9) for i in z.outputs]
+      [0.75136507, 0.772928465]
+      >>> [round(o.error, 9) for o in z._outputs]
+      [0.274811083, 0.023560026]
+      >>> round(z.error(1), 9)
+      0.298371109
+      >>> eta=z.eta
+      >>> round(z.axons[5-1].backprop(eta), 9)
+      0.35891648
+      >>> round(z.axons[6-1].backprop(eta), 9)
+      0.408666186
+      >>> round(z.axons[7-1].backprop(eta), 9)
+      0.51130127
+      >>> round(z.axons[8-1].backprop(eta), 9)
+      0.561370121
+      >>> round(z.axons[1-1].backprop(eta), 9)
+      0.149780716
+      >>> round(z.axons[2-1].backprop(eta), 9)
+      0.19956143
 
 
 
 
     """
     def __init__(self):
-        super().__init__(2, [2], 2, 0.5)
+        super().__init__(2, [2], 2, eta=0.5, dataset={(0.05, 0.10): (0.01, 0.99)})
 
-        self._inputs[0].input = 0.05
-        self._inputs[1].input = 0.10
+        self.inputs = 0.05, 0.10
+        self.outputs = 0.01, 0.99
 
-        self._hiddens = ((Neuron(), Neuron()),)
-
-        self._outputs = (Output(), Output())
-        self._outputs[0].target = 0.01
-        self._outputs[1].target = 0.99
-
-        self._neurons  = (self._inputs,) + self._hiddens + (self._outputs,)
+    def weave(self):
 
         b1 = Static(1)
         i1, i2 = self._inputs
         h1, h2 = self._hiddens[0]
         o1, o2 = self._outputs
 
-
-        self.axons = []
-        self.axons.append(i1.f_connect(h1))
-        self.axons[0].weight = 0.15
-        self.axons.append(i2.f_connect(h1))
-        self.axons[1].weight = 0.20
-        self.axons.append(i1.f_connect(h2))
-        self.axons[2].weight = 0.25
-        self.axons.append(i2.f_connect(h2))
-        self.axons[3].weight = 0.30
+        self.axons.append(i1.f_connect(h1, 0.15))
+        self.axons.append(i2.f_connect(h1, 0.20))
+        self.axons.append(i1.f_connect(h2, 0.25))
+        self.axons.append(i2.f_connect(h2, 0.30))
 
         b1.f_connect(h1, 0.35)
         b1.f_connect(h2, 0.35)
@@ -312,5 +322,4 @@ class ITest(DFFNet):
 
 if __name__ == '__main__':
     import doctest
-    z = ITest()
     doctest.testmod()
