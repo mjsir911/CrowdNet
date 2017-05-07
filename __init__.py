@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+"""http://python-guide-pt-br.readthedocs.io/en/latest/writing/structure/"""
 from .net import DFFNet
 
 __appname__     = ""
