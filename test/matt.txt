@@ -1,0 +1,63 @@
+doctest file
+
+>>> try:
+...     from . import net
+... except:
+...     from __init__ import net
+>>> class ITest(net.DFFNet):
+...     """
+...     using this document
+...     https://mattmazur.com/2015/03/17/a-step-by-step-backpropagation-example/
+...       >>> z = ITest()
+...       >>> print(z.inputs)
+...       [0.05, 0.1]
+...       >>> [a.weight for a in z.axons]
+...       [0.15, 0.2, 0.25, 0.3, 0.4, 0.45, 0.5, 0.55]
+...       >>> print([o.target for o in z._outputs])
+...       [0.01, 0.99]
+...       >>> [round(i, 9) for i in z.outputs]
+...       [0.75136507, 0.772928465]
+...       >>> [round(o.error, 9) for o in z._outputs]
+...       [0.274811083, 0.023560026]
+...       >>> round(z.error(1), 9)
+...       0.298371109
+...       >>> z.train(1)
+...       epoch is 1\r
+...       >>> [round(a.weight, 9) for a in z.axons]
+...       [0.149780716, 0.199561432, 0.249751144, 0.299502287, 0.35891648, 0.408666186, 0.51130127, 0.561370121]
+...
+...
+...
+...
+...     """
+...     def __init__(self):
+...         super().__init__(2, [2], 2, eta=0.5, dataset={(0.05, 0.10): (0.01, 0.99)})
+...
+...         self.inputs = 0.05, 0.10
+...         self.outputs = 0.01, 0.99
+...
+...     def weave(self):
+...
+...         i1, i2 = self._inputs
+...         h1, h2 = self._hiddens[0]
+...         o1, o2 = self._outputs
+...
+...         self.axons.append(i1.f_connect(h1, 0.15))
+...         self.axons.append(i2.f_connect(h1, 0.20))
+...         self.axons.append(i1.f_connect(h2, 0.25))
+...         self.axons.append(i2.f_connect(h2, 0.30))
+...
+...         b1 = Static(1)
+...         self._neurons.append(b1)
+...         b1.f_connect(h1, 0.35)
+...         b1.f_connect(h2, 0.35)
+...
+...         self.axons.append(h1.f_connect(o1, 0.40))
+...         self.axons.append(h2.f_connect(o1, 0.45))
+...         self.axons.append(h1.f_connect(o2, 0.50))
+...         self.axons.append(h2.f_connect(o2, 0.55))
+...
+...         b2 = Static(1)
+...         self._neurons.append(b2)
+...         b2.f_connect(o1, 0.60)
+...         b2.f_connect(o2, 0.60)
