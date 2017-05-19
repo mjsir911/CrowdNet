@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import random
+import abc
 
 __appname__     = ""
 __author__      = "Marco Sirabella"
@@ -158,7 +159,7 @@ class Output(Neuron):
 
 import itertools
 import numpy
-class NNet():
+class NNet(metaclass=abc.ABCMeta):
     def __init__(self, eta=0, dataset=None):
         self.eta = eta
         self.dataset = dataset
