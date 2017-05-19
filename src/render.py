@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import svgwrite
-import net
+from . import net
 
 __appname__     = ""
 __author__      = "Marco Sirabella"
@@ -52,7 +52,9 @@ class Net(svgwrite.Drawing):
         for xPos, yPos in self.coords.values():
             self.add(self.circle((c2percent(xPos), c2percent(yPos)), 10))
 
-z = net.DFFNet(2, [5], 3)
+#z = net.DFFNet(5, [10, 10], 4)
+from . import test
+z = test.ITest()
 svg = Net(z)
 svg.drawNet()
 svg.save()

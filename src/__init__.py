@@ -3,6 +3,7 @@
 
 """http://python-guide-pt-br.readthedocs.io/en/latest/writing/structure/"""
 from .net import DFFNet
+#from . import test
 
 __appname__     = ""
 __author__      = "Marco Sirabella"
