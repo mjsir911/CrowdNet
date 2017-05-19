@@ -183,7 +183,7 @@ class NNet(metaclass=abc.ABCMeta):
 
     @property
     def neurons(self):
-        return tuple(self._inputs + sum(self._hiddens, ()) + self._outputs)
+        return [self._inputs + sum(self._hiddens, []) + self._outputs]
 
     def back_pass(self):
         try:
