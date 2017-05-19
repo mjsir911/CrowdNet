@@ -160,6 +160,7 @@ class Output(Neuron):
 import itertools
 import numpy
 class NNet(metaclass=abc.ABCMeta):
+    @abc.abstractmethod
     def __init__(self, eta=0, dataset=None):
         self.eta = eta
         self.dataset = dataset
@@ -183,7 +184,7 @@ class NNet(metaclass=abc.ABCMeta):
 
     @property
     def neurons(self):
-        return [self._inputs + sum(self._hiddens, []) + self._outputs]
+        return self._inputs + sum(self._hiddens, []) + self._outputs
 
     def back_pass(self):
         try:
@@ -251,10 +252,6 @@ class DFFNet(NNet):
         for oNeuron in inlayer:
             for iNeuron in outlayer:
                 oNeuron.f_connect(iNeuron)
-
-
-
-
 
 
 if __name__ == '__main__':
