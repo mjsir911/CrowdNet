@@ -54,7 +54,7 @@ Finally, install the required modules
 
     pip3 install -r requirements.txt
 
-###Note
+### Note
 To get out of a virtualenv:
     
     deactivate
