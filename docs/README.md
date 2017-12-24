@@ -1,8 +1,3 @@
-#Crowd-Net
-
-##Testing
-right now all you need to do to test how it works is:
-
 # Crowd-Net
 
 The wonderfully generic (hopefully)crowd-sourced neural network
